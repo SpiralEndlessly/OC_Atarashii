@@ -303,7 +303,7 @@ class OCAtari(gym.Env):
         if self.obs_mode == "dqn":
             obs = np.array(self._state_buffer_dqn)
         elif self.obs_mode == "obj":
-            obs = np.array(self._state_buffer_ns)
+            obs = np.array(self._state_buffer_ns, dtype=object)
         return obs, reward, truncated, terminated, info
 
     def _detect_objects_ram(self):
