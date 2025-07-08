@@ -4,7 +4,7 @@ Examples of environments wrapper around OCAtari environments that provide an eas
 
 import gymnasium as gym
 import numpy as np
-from ocatari.core import OCAtari
+from ocatarashii.core import OCAtari
 
 
 class PositionHistoryEnv(gym.Env):
@@ -17,24 +17,23 @@ class PositionHistoryEnv(gym.Env):
 
     def __init__(self, env_name: str) -> None:
         super().__init__()
-        self.ocatari_env = OCAtari(
-            env_name, mode="ram", hud=False, obs_mode=None)
+        self.ocatari_env = OCAtari(env_name, mode="ram", hud=False, obs_mode=None)
         self.reference_list = self._init_ref_vector()
-        self.current_vector = np.zeros(
-            4 * len(self.reference_list), dtype=np.float32)
+        self.current_vector = np.zeros(4 * len(self.reference_list), dtype=np.float32)
 
     @property
     def observation_space(self):
         vl = len(self.reference_list) * 4
-        return gym.spaces.Box(low=-2**63, high=2**63 - 2, shape=(vl, ), dtype=np.float32)
+        return gym.spaces.Box(
+            low=-(2**63), high=2**63 - 2, shape=(vl,), dtype=np.float32
+        )
 
     @property
     def action_space(self):
         return self.ocatari_env.action_space
 
     def step(self, *args, **kwargs):
-        _, reward, truncated, terminated, info = self.ocatari_env.step(
-            *args, **kwargs)
+        _, reward, truncated, terminated, info = self.ocatari_env.step(*args, **kwargs)
         self._obj2vec()
         return self.current_vector, reward, truncated, terminated, info
 
@@ -78,8 +77,8 @@ class PositionHistoryEnv(gym.Env):
             idx = temp_ref_list.index(o.category)
             start = idx * 4
             flat = [item for sublist in o.h_coords for item in sublist]
-            self.current_vector[start:start + 4] = flat  # write the slice
+            self.current_vector[start : start + 4] = flat  # write the slice
             temp_ref_list[idx] = ""  # remove reference from reference list
         for i, d in enumerate(temp_ref_list):
             if d != "":  # fill not populated category instances wiht 0.0's
-                self.current_vector[i*4:i*4+4] = [0.0, 0.0, 0.0, 0.0]
+                self.current_vector[i * 4 : i * 4 + 4] = [0.0, 0.0, 0.0, 0.0]

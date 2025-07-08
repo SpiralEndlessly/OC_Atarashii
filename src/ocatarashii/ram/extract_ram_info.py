@@ -1,14 +1,14 @@
 import sys
 from termcolor import colored
 import numpy as np
-from ocatari.vision.game_objects import NoObject
+from ocatarashii.vision.game_objects import NoObject
 
 
 # parses MAX_NB* dicts, returns default init list of objects
 def instantiate_max_objects(game_name, max_obj_dict):
     objects = []
-    p_module = __name__.split('.')[:-1] + [game_name.lower()]
-    game_module = '.'.join(p_module)
+    p_module = __name__.split(".")[:-1] + [game_name.lower()]
+    game_module = ".".join(p_module)
     try:
         mod = sys.modules[game_module]
     except KeyError as err:
@@ -20,8 +20,8 @@ def instantiate_max_objects(game_name, max_obj_dict):
 
 
 def get_class_dict(game_name):
-    p_module = __name__.split('.')[:-1] + [game_name.lower()]
-    game_module = '.'.join(p_module)
+    p_module = __name__.split(".")[:-1] + [game_name.lower()]
+    game_module = ".".join(p_module)
     try:
         mod = sys.modules[game_module]
         classes = {}
@@ -32,12 +32,13 @@ def get_class_dict(game_name):
         raise KeyError(f"Game module does not exist: {game_module}")
     except AttributeError as err:
         raise AttributeError(
-            f"MAX_NB_OBJECTS_HUD not implemented for game: {game_name}")
+            f"MAX_NB_OBJECTS_HUD not implemented for game: {game_name}"
+        )
 
 
 def get_max_objects(game_name, hud):
-    p_module = __name__.split('.')[:-1] + [game_name.lower()]
-    game_module = '.'.join(p_module)
+    p_module = __name__.split(".")[:-1] + [game_name.lower()]
+    game_module = ".".join(p_module)
     try:
         mod = sys.modules[game_module]
         if hud:
@@ -47,14 +48,15 @@ def get_max_objects(game_name, hud):
         raise KeyError(f"Game module does not exist: {game_module}")
     except AttributeError as err:
         raise AttributeError(
-            f"MAX_NB_OBJECTS_HUD not implemented for game: {game_name}")
+            f"MAX_NB_OBJECTS_HUD not implemented for game: {game_name}"
+        )
 
 
 def use_vision_objects(objects, game_module):
     """
     replaces ram objects with their equivalent vision objects
     """
-    game_module_vision = game_module.replace('ram', 'vision')
+    game_module_vision = game_module.replace("ram", "vision")
     mod = sys.modules[game_module_vision]
     for i, obj in enumerate(objects):
         if obj:  # skip None objects
@@ -65,8 +67,8 @@ def use_vision_objects(objects, game_module):
 
 
 def init_objects(game_name, hud, vision=False):
-    p_module = __name__.split('.')[:-1] + [game_name.lower()]
-    game_module = '.'.join(p_module)
+    p_module = __name__.split(".")[:-1] + [game_name.lower()]
+    game_module = ".".join(p_module)
     try:
         mod = sys.modules[game_module]
         if vision:
@@ -75,13 +77,12 @@ def init_objects(game_name, hud, vision=False):
     except KeyError as err:
         raise KeyError(f"Game module does not exist: {game_module}")
     except AttributeError as err:
-        raise AttributeError(
-            f"init_objects not implemented for game: {game_name}")
+        raise AttributeError(f"init_objects not implemented for game: {game_name}")
 
 
 def detect_objects_raw(info, ram_state, game_name):
-    p_module = __name__.split('.')[:-1] + [game_name.lower()]
-    game_module = '.'.join(p_module)
+    p_module = __name__.split(".")[:-1] + [game_name.lower()]
+    game_module = ".".join(p_module)
 
     try:
         mod = sys.modules[game_module]
@@ -94,8 +95,8 @@ def detect_objects_raw(info, ram_state, game_name):
 
 
 def detect_objects_ram(objects, ram_state, game_name, hud):
-    p_module = __name__.split('.')[:-1] + [game_name.lower()]
-    game_module = '.'.join(p_module)
+    p_module = __name__.split(".")[:-1] + [game_name.lower()]
+    game_module = ".".join(p_module)
     for obj in objects:  # saving the previous positions
         if obj:
             obj._save_prev()
@@ -118,10 +119,12 @@ def get_object_state_size(game_name, hud):
 
 def get_object_state(reference_list, objects, game_name):
     import warnings
+
     warnings.warn(
-        "get_object_state is deprecated and will be removed in the next major release. Use the new obj_representation")
-    p_module = __name__.split('.')[:-1] + [game_name.lower()]
-    game_module = '.'.join(p_module)
+        "get_object_state is deprecated and will be removed in the next major release. Use the new obj_representation"
+    )
+    p_module = __name__.split(".")[:-1] + [game_name.lower()]
+    game_module = ".".join(p_module)
     try:
         mod = sys.modules[game_module]
         state = mod._get_object_state(reference_list, objects)

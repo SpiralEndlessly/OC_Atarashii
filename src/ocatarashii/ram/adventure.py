@@ -1,6 +1,6 @@
 import sys
 
-from ocatari.ram import GameObject
+from ocatarashii.ram import GameObject
 
 """
 The map can be found here, if needed :
@@ -120,7 +120,9 @@ def _init_objects_ram(hud=False):
     """
     (Re)Initialize the objects
     """
-    objects = [Player(),]
+    objects = [
+        Player(),
+    ]
     return objects
 
 

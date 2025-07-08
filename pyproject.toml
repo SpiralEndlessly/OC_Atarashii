@@ -9,6 +9,7 @@ description = "Extended Object Centric Atari 2600"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "ale_py>=0.11.1",
     "gymnasium>=1.2.0",
     "matplotlib>=3.10.3",
     "opencv_python>=4.12.0.88",
@@ -22,3 +23,6 @@ dependencies = [
     "pygame>=2.6.1",
     "pyfiglet>=1.0.3",
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]

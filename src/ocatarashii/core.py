@@ -3,13 +3,18 @@ import numpy as np
 import gymnasium as gym
 from itertools import chain
 from termcolor import colored
-from ocatari.ram.extract_ram_info import (
-    detect_objects_ram, init_objects, get_max_objects, get_object_state_size, get_class_dict)
-from ocatari.vision.extract_vision_info import detect_objects_vision
-from ocatari.vision.utils import mark_bb, to_rgba
-from ocatari.ram.game_objects import GameObject, ValueObject
-from ocatari.vision.game_objects import GameObject as GameObjectVision
-from ocatari.utils import draw_label, draw_arrow
+from ocatarashii.ram.extract_ram_info import (
+    detect_objects_ram,
+    init_objects,
+    get_max_objects,
+    get_object_state_size,
+    get_class_dict,
+)
+from ocatarashii.vision.extract_vision_info import detect_objects_vision
+from ocatarashii.vision.utils import mark_bb, to_rgba
+from ocatarashii.ram.game_objects import GameObject, ValueObject
+from ocatarashii.vision.game_objects import GameObject as GameObjectVision
+from ocatarashii.utils import draw_label, draw_arrow
 from gymnasium.error import NameNotFound
 import warnings
 
@@ -18,7 +23,8 @@ try:
     import ale_py
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
-        '\nALE is required when using the ALE env wrapper. Try `pip install "gymnasium[atari, accept-rom-license]"`\n')
+        '\nALE is required when using the ALE env wrapper. Try `pip install "gymnasium[atari, accept-rom-license]"`\n'
+    )
 
 
 try:
@@ -26,23 +32,81 @@ try:
     import cv2
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
-        '\nOpenCV is required when using the ALE env wrapper. Try `pip install opencv-python`.')
+        "\nOpenCV is required when using the ALE env wrapper. Try `pip install opencv-python`."
+    )
 
 try:
     import pygame  # Pygame is required for rendering the environment for human visualization
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
-        '\npygame is required for human rendering. Try `pip install pygame`.')
+        "\npygame is required for human rendering. Try `pip install pygame`."
+    )
 
 # List of available games for the OCAtari environment
 AVAILABLE_GAMES = [
-    "Adventure", "AirRaid", "Alien", "Amidar", "Assault", "Asterix", "Asteroids", "Atlantis", "BankHeist", "BattleZone",
-    "BeamRider", "Berzerk", "Bowling", "Boxing", "Breakout", "Carnival", "Centipede", "ChopperCommand", "CrazyClimber",
-    "DemonAttack", "DonkeyKong", "DoubleDunk", "Enduro", "FishingDerby", "Freeway", "Frogger", "Frostbite", "Galaxian",
-    "Gopher", "Hero", "IceHockey", "Jamesbond", "Kangaroo", "KeystoneKapers", "KingKong", "Krull", "KungFuMaster",
-    "MarioBros", "MontezumaRevenge", "MsPacman", "NameThisGame", "Pacman", "Phoenix", "Pitfall", "Pitfall2", "Pong",
-    "Pooyan", "PrivateEye", "Qbert", "Riverraid", "RoadRunner", "Robotank", "Seaquest", "Skiing", "SpaceInvaders", "StarGunner",
-    "Tennis", "TimePilot", "UpNDown", "Venture", "VideoPinball", "YarsRevenge", "Zaxxon"
+    "Adventure",
+    "AirRaid",
+    "Alien",
+    "Amidar",
+    "Assault",
+    "Asterix",
+    "Asteroids",
+    "Atlantis",
+    "BankHeist",
+    "BattleZone",
+    "BeamRider",
+    "Berzerk",
+    "Bowling",
+    "Boxing",
+    "Breakout",
+    "Carnival",
+    "Centipede",
+    "ChopperCommand",
+    "CrazyClimber",
+    "DemonAttack",
+    "DonkeyKong",
+    "DoubleDunk",
+    "Enduro",
+    "FishingDerby",
+    "Freeway",
+    "Frogger",
+    "Frostbite",
+    "Galaxian",
+    "Gopher",
+    "Hero",
+    "IceHockey",
+    "Jamesbond",
+    "Kangaroo",
+    "KeystoneKapers",
+    "KingKong",
+    "Krull",
+    "KungFuMaster",
+    "MarioBros",
+    "MontezumaRevenge",
+    "MsPacman",
+    "NameThisGame",
+    "Pacman",
+    "Phoenix",
+    "Pitfall",
+    "Pitfall2",
+    "Pong",
+    "Pooyan",
+    "PrivateEye",
+    "Qbert",
+    "Riverraid",
+    "RoadRunner",
+    "Robotank",
+    "Seaquest",
+    "Skiing",
+    "SpaceInvaders",
+    "StarGunner",
+    "Tennis",
+    "TimePilot",
+    "UpNDown",
+    "Venture",
+    "VideoPinball",
+    "YarsRevenge",
+    "Zaxxon",
 ]
 
 # Constant to control the upscaling factor for rendering
@@ -68,11 +132,29 @@ class OCAtari(gym.Env):
     The remaining \*args and \**kwargs will be passed to the `gymnasium.make` function.
     """
 
-    def __init__(self, env_name, mode="ram", hud=False, obs_mode="obj", render_mode=None, render_oc_overlay=False, buffer_window_size=4, create_buffer_stacks=["ori"], *args, **kwargs):
+    def __init__(
+        self,
+        env_name,
+        mode="ram",
+        hud=False,
+        obs_mode="obj",
+        render_mode=None,
+        render_oc_overlay=False,
+        buffer_window_size=4,
+        create_buffer_stacks=["ori"],
+        *args,
+        **kwargs,
+    ):
         # Determine the game name and check if it's supported
         # Extract the game name and ensure it's within the supported games
-        game_name = env_name.split("/")[1].split("-")[0].split("No")[0].split("Deterministic")[
-            0] if "ALE/" in env_name else env_name.split("-")[0].split("No")[0].split("Deterministic")[0]
+        game_name = (
+            env_name.split("/")[1]
+            .split("-")[0]
+            .split("No")[0]
+            .split("Deterministic")[0]
+            if "ALE/" in env_name
+            else env_name.split("-")[0].split("No")[0].split("Deterministic")[0]
+        )
         # if game_name[:4] not in [gn[:4] for gn in AVAILABLE_GAMES]:
         #     raise ValueError(f"Game '{env_name}' not covered yet by OCAtari")
 
@@ -94,13 +176,13 @@ class OCAtari(gym.Env):
         # Attempt to create the environment; fallback if necessary
         # Initialize the Atari environment with the specified rendering options
         try:
-            self._env = gym.make(
-                env_name, render_mode=gym_render_mode, *args, **kwargs)
+            self._env = gym.make(env_name, render_mode=gym_render_mode, *args, **kwargs)
         except NameNotFound:
             # If the environment name is not found, try using the default ALE naming convention
             cenv_name = f"ALE/{env_name}-v5"
             self._env = gym.make(
-                cenv_name, render_mode=gym_render_mode, *args, **kwargs)
+                cenv_name, render_mode=gym_render_mode, *args, **kwargs
+            )
             self.env_name = cenv_name
 
         # Define observation space based on the observation mode
@@ -110,29 +192,36 @@ class OCAtari(gym.Env):
             # Set stack for DQN mode (grayscale, 84x84)
             create_buffer_stacks.append("dqn")
             self._env.observation_space = gym.spaces.Box(
-                0, 255.0, (self.buffer_window_size, 84, 84))
+                0, 255.0, (self.buffer_window_size, 84, 84)
+            )
         elif obs_mode == "obj":
             # Set up object tracking and observation properties
             # Get the maximum number of objects per category for the game
-            self.max_objects_per_cat = get_max_objects(
-                self.game_name, self.hud)
+            self.max_objects_per_cat = get_max_objects(self.game_name, self.hud)
             # Create a dictionary of game object classes for categorization
             self._class_dict = get_class_dict(self.game_name)
             # Initialize slots to store all possible game objects
-            self._slots = [self._class_dict[c]()
-                           for c, n in self.max_objects_per_cat.items()
-                           for _ in range(n)]
+            self._slots = [
+                self._class_dict[c]()
+                for c, n in self.max_objects_per_cat.items()
+                for _ in range(n)
+            ]
             # Initialize the neurosymbolic state representation with zeros
-            self._ns_state = np.zeros(
-                sum([len(o._nsrepr) for o in self._slots]))
+            self._ns_state = np.zeros(sum([len(o._nsrepr) for o in self._slots]))
             # Store the meaning of each neurosymbolic state representation
-            self.ns_meaning = [
-                f"{o.category} ({o._ns_meaning})" for o in self._slots]
+            self.ns_meaning = [f"{o.category} ({o._ns_meaning})" for o in self._slots]
             # Create a stack of ns_states (objects, buffer_size x ocss)
             create_buffer_stacks.append("obj")
             self._env.observation_space = gym.spaces.Box(
-                0, 255.0, (self.buffer_window_size, get_object_state_size(self.game_name, self.hud)))
+                0,
+                255.0,
+                (
+                    self.buffer_window_size,
+                    get_object_state_size(self.game_name, self.hud),
+                ),
+            )
             import warnings
+
             # warnings.warn("With Release 2.0 we switched to our new object-centric representation, see", DeprecationWarning)
         else:
             raise AttributeError("No valid obs_mode was selected")
@@ -147,12 +236,15 @@ class OCAtari(gym.Env):
         self.create_rgb_stack = "ori" in create_buffer_stacks
         self.create_dqn_stack = "dqn" in create_buffer_stacks
         self.create_ns_stack = "obj" in create_buffer_stacks
-        self._state_buffer_rgb = deque(
-            [], maxlen=self.buffer_window_size) if self.create_rgb_stack else None
-        self._state_buffer_ns = deque(
-            [], maxlen=self.buffer_window_size) if self.create_ns_stack else None
-        self._state_buffer_dqn = deque(
-            [], maxlen=self.buffer_window_size) if self.create_dqn_stack else None
+        self._state_buffer_rgb = (
+            deque([], maxlen=self.buffer_window_size) if self.create_rgb_stack else None
+        )
+        self._state_buffer_ns = (
+            deque([], maxlen=self.buffer_window_size) if self.create_ns_stack else None
+        )
+        self._state_buffer_dqn = (
+            deque([], maxlen=self.buffer_window_size) if self.create_dqn_stack else None
+        )
         # Set action space based on the environment's action space
         self.action_space = self._env.action_space
         # Store the ALE interface of the environment
@@ -202,8 +294,7 @@ class OCAtari(gym.Env):
         :rtype: tuple
         """
         # Execute the action and obtain the next state and reward
-        obs, reward, terminated, truncated, info = self._env.step(
-            *args, **kwargs)
+        obs, reward, terminated, truncated, info = self._env.step(*args, **kwargs)
         # Detect objects based on the configured detection mode
         self.detect_objects()
         # Fill the buffer for observations
@@ -218,7 +309,8 @@ class OCAtari(gym.Env):
     def _detect_objects_ram(self):
         # Detect objects using RAM-based extraction
         detect_objects_ram(
-            self.objects, self._env.env.unwrapped.ale.getRAM(), self.game_name, self.hud)  # type: ignore
+            self.objects, self._env.env.unwrapped.ale.getRAM(), self.game_name, self.hud
+        )  # type: ignore
 
     def _detect_objects_vision(self):
         """
@@ -230,14 +322,23 @@ class OCAtari(gym.Env):
         """
         # Detect objects using vision-based extraction
         detect_objects_vision(
-            self.objects, self._env.env.unwrapped.ale.getScreenRGB(), self.game_name, self.hud)  # type: ignore
+            self.objects,
+            self._env.env.unwrapped.ale.getScreenRGB(),
+            self.game_name,
+            self.hud,
+        )  # type: ignore
 
     def _detect_objects_both(self):
         # Use both RAM and vision-based extraction methods to detect objects
         detect_objects_ram(
-            self.objects, self._env.env.unwrapped.ale.getRAM(), self.game_name, self.hud)  # type: ignore
+            self.objects, self._env.env.unwrapped.ale.getRAM(), self.game_name, self.hud
+        )  # type: ignore
         detect_objects_vision(
-            self.objects_v, self._env.env.unwrapped.ale.getScreenRGB(), self.game_name, self.hud)  # type: ignore
+            self.objects_v,
+            self._env.env.unwrapped.ale.getScreenRGB(),
+            self.game_name,
+            self.hud,
+        )  # type: ignore
 
     def _reset_buffer(self):
         # Reset the buffer by filling it with the initial states
@@ -261,7 +362,8 @@ class OCAtari(gym.Env):
         # Reset the environment and detect objects from the initial state
         obs, info = self._env.reset(*args, **kwargs)
         self.objects = init_objects(
-            self.game_name, self.hud, vision=self.mode == "vision")
+            self.game_name, self.hud, vision=self.mode == "vision"
+        )
         self.detect_objects()
         # Reset the buffer after environment reset
         self._reset_buffer()
@@ -275,13 +377,17 @@ class OCAtari(gym.Env):
     def _fill_buffer(self):
         # Fill the RGB, DQN, and neurosymbolic state buffers with the current states
         if self.create_dqn_stack:
-            dqn_obs = cv2.resize(cv2.cvtColor(self.getScreenRGB(
-            ), cv2.COLOR_RGB2GRAY), (84, 84), interpolation=cv2.INTER_AREA)
+            dqn_obs = cv2.resize(
+                cv2.cvtColor(self.getScreenRGB(), cv2.COLOR_RGB2GRAY),
+                (84, 84),
+                interpolation=cv2.INTER_AREA,
+            )
             self._state_buffer_dqn.append(dqn_obs)
         if self.create_rgb_stack:
             self._state_buffer_rgb.append(self.getScreenRGB())
         if self.create_ns_stack:
             self._state_buffer_ns.append(self.ns_state)
+
     window: pygame.Surface = None
     clock: pygame.time.Clock = None
 
@@ -294,8 +400,10 @@ class OCAtari(gym.Env):
         self.image_size = (sample_image.shape[1], sample_image.shape[0])
         # render with higher res
         self.window_size = (
-            sample_image.shape[1] * UPSCALE_FACTOR, sample_image.shape[0] * UPSCALE_FACTOR)
-        self.label_font = pygame.font.SysFont('Pixel12x10', 16)
+            sample_image.shape[1] * UPSCALE_FACTOR,
+            sample_image.shape[0] * UPSCALE_FACTOR,
+        )
+        self.label_font = pygame.font.SysFont("Pixel12x10", 16)
         if self.render_mode == "human":
             self.window = pygame.display.set_mode(self.window_size)
             self.clock = pygame.time.Clock()
@@ -316,7 +424,11 @@ class OCAtari(gym.Env):
         if not self.render_oc_overlay:
             if self.rendering_initialized:
                 # Upscale and return the rendered image
-                return image.swapaxes(0, 1).repeat(UPSCALE_FACTOR, axis=0).repeat(UPSCALE_FACTOR, axis=1)
+                return (
+                    image.swapaxes(0, 1)
+                    .repeat(UPSCALE_FACTOR, axis=0)
+                    .repeat(UPSCALE_FACTOR, axis=1)
+                )
             return image
         if not self.rendering_initialized:
             self._initialize_rendering(image)
@@ -325,8 +437,7 @@ class OCAtari(gym.Env):
         image = np.transpose(image, (1, 0, 2))
         image_surface = pygame.Surface(self.image_size)
         pygame.pixelcopy.array_to_surface(image_surface, image)
-        upscaled_image = pygame.transform.scale(
-            image_surface, self.window_size)
+        upscaled_image = pygame.transform.scale(image_surface, self.window_size)
         self.window.blit(upscaled_image, (0, 0))
 
         # Overlay surface for additional visualizations like bounding boxes
@@ -343,30 +454,44 @@ class OCAtari(gym.Env):
 
             # Scale object properties for rendering
             dx, dy = game_object.dx * UPSCALE_FACTOR, game_object.dy * UPSCALE_FACTOR
-            x, y, w, h = x * UPSCALE_FACTOR, y * UPSCALE_FACTOR, w * \
-                UPSCALE_FACTOR, h * UPSCALE_FACTOR
+            x, y, w, h = (
+                x * UPSCALE_FACTOR,
+                y * UPSCALE_FACTOR,
+                w * UPSCALE_FACTOR,
+                h * UPSCALE_FACTOR,
+            )
             x_c, y_c = x + w // 2, y + h // 2
 
             # Draw bounding box
             pygame.draw.rect(
-                overlay_surface, color=game_object.rgb, rect=(x, y, w, h), width=2)
+                overlay_surface, color=game_object.rgb, rect=(x, y, w, h), width=2
+            )
             # Draw label with object category
             label = game_object.category
             if isinstance(game_object, ValueObject):
                 label += f" ({game_object.value})"
-            draw_label(self.window, label, position=(
-                x, y + h + 4), font=self.label_font)
+            draw_label(
+                self.window, label, position=(x, y + h + 4), font=self.label_font
+            )
             # Draw velocity vector if applicable
             if dx != 0 or dy != 0:
-                draw_arrow(overlay_surface, start_pos=(float(x_c), float(y_c)), end_pos=(
-                    x_c + 2 * dx, y_c + 2 * dy), color=(100, 200, 255), width=2)
+                draw_arrow(
+                    overlay_surface,
+                    start_pos=(float(x_c), float(y_c)),
+                    end_pos=(x_c + 2 * dx, y_c + 2 * dy),
+                    color=(100, 200, 255),
+                    width=2,
+                )
 
         self.window.blit(overlay_surface, (0, 0))
 
         # Update the display for human rendering or return the image array for rgb_array mode
         if self.render_mode == "human":
-            frameskip = self._env.unwrapped._frameskip if isinstance(
-                self._env.unwrapped._frameskip, int) else 1
+            frameskip = (
+                self._env.unwrapped._frameskip
+                if isinstance(self._env.unwrapped._frameskip, int)
+                else 1
+            )
             self.clock.tick(60 // frameskip)
             pygame.display.flip()
             pygame.event.pump()
@@ -460,6 +585,7 @@ class OCAtari(gym.Env):
         for obj in self.objects:
             mark_bb(rendered, obj.xywh, color=obj.rgb)
         import matplotlib.pyplot as plt
+
         plt.imshow(rendered)
         rows, cells, colors = [], [], []
         columns = ["X, Y", "W, H", "R, G, B"]
@@ -468,8 +594,15 @@ class OCAtari(gym.Env):
             cells.append([obj.xy, obj.wh, obj.rgb])
             colors.append(to_rgba(obj.rgb))
         t_height = 0.03 * len(rows)
-        table = plt.table(cellText=cells, rowLabels=rows, rowColours=colors, colLabels=columns,
-                          colWidths=[.2, .2, .3], bbox=[0.1, 1.02, 0.8, t_height], loc='top')
+        table = plt.table(
+            cellText=cells,
+            rowLabels=rows,
+            rowColours=colors,
+            colLabels=columns,
+            colWidths=[0.2, 0.2, 0.3],
+            bbox=[0.1, 1.02, 0.8, t_height],
+            loc="top",
+        )
         table.set_fontsize(14)
         plt.subplots_adjust(top=0.8)
         plt.show()

@@ -3,6 +3,22 @@ revision = 1
 requires-python = ">=3.13"
 
 [[package]]
+name = "ale-py"
+version = "0.11.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f4/d3/20194558db47ec946d48dd8eee8f761495ffd2ecc739ef9391d699752211/ale_py-0.11.1.tar.gz", hash = "sha256:ef2f6032b6b8ec2de65a9824d575c814043ff1e7a56458a15440640b284a23cc", size = 508324 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d9/31/78a3118ff357252c1eb9a2740dcfe88fe4d35c04ab1f0a353975f6405a4c/ale_py-0.11.1-cp313-cp313-macosx_13_0_arm64.whl", hash = "sha256:9b1231bd1d12edafe901f66b86c64fa030b956a0dfacfd739bcbfa792310b5b9", size = 2338721 },
+    { url = "https://files.pythonhosted.org/packages/e7/92/9a03eed9a49e563f5639626317deacd5f4c23c4f89a77c07f156195937be/ale_py-0.11.1-cp313-cp313-macosx_13_0_x86_64.whl", hash = "sha256:783d641ad220588d9794726b784a28803369f6ba3c0ff3dc272a3e086bdd1fcf", size = 2471870 },
+    { url = "https://files.pythonhosted.org/packages/61/44/868f1b1578a2f93b9d3e2f327b89c36653663d24d6d0c37d05d87e26bb5a/ale_py-0.11.1-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:2f27d02f86b5c8fa275196ae8180fc47cbd0902511bc287c61762f1777997bd3", size = 4668356 },
+    { url = "https://files.pythonhosted.org/packages/a2/65/2d530af67627ea69d386d6a9c2826dc6dfe8997f5ce0e9c2966533cb3711/ale_py-0.11.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:b6697fbcb5498b336afd79138fc52a688ee3f969d235f2b2ac7e2426ad2b4b64", size = 4640097 },
+    { url = "https://files.pythonhosted.org/packages/e4/1a/1712e362ff62b4ea9f4850157e78fa0d27ef5e8bce1daadd001a56e5b3a1/ale_py-0.11.1-cp313-cp313-win_amd64.whl", hash = "sha256:c46c0fe42bb1616ac30b18248071149a206ae8e656030318ad30d79450ef0721", size = 3455307 },
+]
+
+[[package]]
 name = "cloudpickle"
 version = "3.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -256,6 +272,7 @@ name = "ocatarashii"
 version = "2.2.2"
 source = { editable = "." }
 dependencies = [
+    { name = "ale-py" },
     { name = "gymnasium" },
     { name = "keyboard" },
     { name = "matplotlib" },
@@ -272,6 +289,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "ale-py", specifier = ">=0.11.1" },
     { name = "gymnasium", specifier = ">=1.2.0" },
     { name = "keyboard", specifier = ">=0.13.5" },
     { name = "matplotlib", specifier = ">=3.10.3" },
