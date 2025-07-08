@@ -1,7 +1,8 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
-sys.path.insert(0, '../../ocatari') # noqa
+
+sys.path.insert(0, "../../ocatarashii")  # noqa
 from core import OCAtari
 import random
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ game_name = "Skiing"
 MODE = "vision"
 # MODE = "raw"
 # MODE = "revised"
-env = OCAtari(game_name, mode=MODE, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, render_mode="rgb_array")
 observation, info = env.reset()
 prevRam = None
 already_figured_out = []
@@ -29,7 +30,7 @@ for i in range(1000):
     else:
         action = random.randint(0, 2)
     obs, reward, terminated, truncated, info = env.step(action)
-    if info.get('frame_number') > 0 and i % 100 == 0:
+    if info.get("frame_number") > 0 and i % 100 == 0:
         for obj_name, o_list in info["objects"].items():
             print(obj_name)
             for oinfo in o_list:

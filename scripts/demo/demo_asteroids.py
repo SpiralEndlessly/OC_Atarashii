@@ -1,26 +1,27 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
 import matplotlib.pyplot as plt
-sys.path.insert(0, '../../') # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
 
 game_name = "AsteroidsNoFrameskip-v4"
 MODE = "vision"
 MODE = "revised"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 
 for i in range(1000000):
-    obs, reward, terminated, truncated, info = env.step(0)   #random.randint(0, 4))
+    obs, reward, terminated, truncated, info = env.step(0)  # random.randint(0, 4))
     obs, reward, terminated, truncated, info = env.step(1)
-    
+
     ram = env._env.unwrapped.ale.getRAM()
-   # env.set_ram(3, 30)
+    # env.set_ram(3, 30)
     if i % 1 == 0:
         env.set_ram(62, 32)
         # obse2 = deepcopy(obse)

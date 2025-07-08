@@ -10,17 +10,40 @@ from copy import deepcopy
 
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, '../ocatari')  # noqa
-from ocatari.core import OCAtari
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
+
 # from alive_progress import alive_bar
-from ocatari.utils import parser, make_deterministic
+from ocatarashii.utils import parser, make_deterministic
 from detect_walls import detect_Walls
 from detect_walls import detect_lava_walls
 
-number_of_configuration_per_level = [2, 4, 6, 8, 8, 10, 12, 14, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16]
+number_of_configuration_per_level = [
+    2,
+    4,
+    6,
+    8,
+    8,
+    10,
+    12,
+    14,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+]
 
-parser.add_argument("-g", "--game", type=str, required=True,
-                    help="game to evaluate (e.g. 'Pong')")
+parser.add_argument(
+    "-g", "--game", type=str, required=True, help="game to evaluate (e.g. 'Pong')"
+)
 
 opts = parser.parse_args()
 
@@ -32,7 +55,7 @@ random.seed(0)
 
 make_deterministic(0, env)
 
-get_bin = lambda x: format(int(x), 'b').zfill(8)
+get_bin = lambda x: format(int(x), "b").zfill(8)
 
 observation, info = env.reset()
 
@@ -43,7 +66,10 @@ binary_mode = False
 
 def show_ims(obs, level_number, configuration_number):
     plt.imshow(obs)
-    plt.title(f"level set to {level_number} and configuration {configuration_number})", fontsize=20)
+    plt.title(
+        f"level set to {level_number} and configuration {configuration_number})",
+        fontsize=20,
+    )
     plt.show()
 
 
@@ -84,7 +110,6 @@ for level_number in range(0, 20):
 
         env.set_ram(31, 61)
 
-
         if configuration_number == number_of_configuration_per_level[level_number] - 1:
             env.set_ram(27, env.get_ram()[41])
             env.set_ram(31, 61)
@@ -105,11 +130,17 @@ for level_number in range(0, 20):
         for lava_wall in detect_lava_walls(resulting_obs):
             to_add = True
             for j in range(len(already_added_lava_walls)):
-                if ((already_added_lava_walls[j].x <= lava_wall.x <= already_added_lava_walls[j].x +
-                     already_added_lava_walls[j].w and lava_wall.y ==
-                     already_added_lava_walls[j].y) or
-                        (lava_wall.x <= already_added_lava_walls[j].x <= lava_wall.x + lava_wall.w and lava_wall.y ==
-                         already_added_lava_walls[j].y)):
+                if (
+                    already_added_lava_walls[j].x
+                    <= lava_wall.x
+                    <= already_added_lava_walls[j].x + already_added_lava_walls[j].w
+                    and lava_wall.y == already_added_lava_walls[j].y
+                ) or (
+                    lava_wall.x
+                    <= already_added_lava_walls[j].x
+                    <= lava_wall.x + lava_wall.w
+                    and lava_wall.y == already_added_lava_walls[j].y
+                ):
                     to_add = False
             if to_add:
                 lava_walls.append(lava_wall)
@@ -123,11 +154,17 @@ for level_number in range(0, 20):
         for lava_wall in detect_lava_walls(resulting_obs):
             to_add = True
             for j in range(len(already_added_lava_walls)):
-                if ((already_added_lava_walls[j].x <= lava_wall.x <= already_added_lava_walls[j].x +
-                     already_added_lava_walls[j].w and lava_wall.y ==
-                     already_added_lava_walls[j].y) or
-                        (lava_wall.x <= already_added_lava_walls[j].x <= lava_wall.x + lava_wall.w and lava_wall.y ==
-                         already_added_lava_walls[j].y)):
+                if (
+                    already_added_lava_walls[j].x
+                    <= lava_wall.x
+                    <= already_added_lava_walls[j].x + already_added_lava_walls[j].w
+                    and lava_wall.y == already_added_lava_walls[j].y
+                ) or (
+                    lava_wall.x
+                    <= already_added_lava_walls[j].x
+                    <= lava_wall.x + lava_wall.w
+                    and lava_wall.y == already_added_lava_walls[j].y
+                ):
                     to_add = False
             if to_add:
                 lava_walls.append(lava_wall)
@@ -141,23 +178,52 @@ for level_number in range(0, 20):
             wall = lava_walls[i]
             if wall.destructible:
                 code += lava_wall_indentation + f"wall_instance{i} = LavaWall()\n"
-                code += lava_wall_indentation + f"destructible_wall = objects_map['destructible wall']\n"
-                code += lava_wall_indentation + f"wall_instance{i}.xy = destructible_wall.xy\n"
-                code += lava_wall_indentation + f"wall_instance{i}.wh = destructible_wall.wh\n"
-                code += lava_wall_indentation + f"wall_instance{i}.destructible = True\n"
-                code += lava_wall_indentation + f"if objects_map['destructible wall'] != None:\n"
-                code += lava_wall_indentation + "    " + f"objects_map['destructible wall'] = wall_instance{i}\n"
+                code += (
+                    lava_wall_indentation
+                    + f"destructible_wall = objects_map['destructible wall']\n"
+                )
+                code += (
+                    lava_wall_indentation
+                    + f"wall_instance{i}.xy = destructible_wall.xy\n"
+                )
+                code += (
+                    lava_wall_indentation
+                    + f"wall_instance{i}.wh = destructible_wall.wh\n"
+                )
+                code += (
+                    lava_wall_indentation + f"wall_instance{i}.destructible = True\n"
+                )
+                code += (
+                    lava_wall_indentation
+                    + f"if objects_map['destructible wall'] != None:\n"
+                )
+                code += (
+                    lava_wall_indentation
+                    + "    "
+                    + f"objects_map['destructible wall'] = wall_instance{i}\n"
+                )
             else:
                 code += lava_wall_indentation + f"wall_instance{i} = LavaWall()\n"
                 code += lava_wall_indentation + f"wall_instance{i}.xy = {wall.xy}\n"
                 code += lava_wall_indentation + f"wall_instance{i}.wh = {wall.wh}\n"
-                code += lava_wall_indentation + f"objects_map['lava wall {number_of_lava_walls}'] = wall_instance{i}\n"
+                code += (
+                    lava_wall_indentation
+                    + f"objects_map['lava wall {number_of_lava_walls}'] = wall_instance{i}\n"
+                )
                 number_of_lava_walls += 1
-        code += lava_wall_indentation + f"number_of_lava_walls = {number_of_lava_walls}\n"
+        code += (
+            lava_wall_indentation + f"number_of_lava_walls = {number_of_lava_walls}\n"
+        )
         code += lava_wall_indentation + "i = 0\n"
-        code += lava_wall_indentation + """while(objects_map.get(f"lava wall {number_of_lava_walls + i}")!= None):\n"""
+        code += (
+            lava_wall_indentation
+            + """while(objects_map.get(f"lava wall {number_of_lava_walls + i}")!= None):\n"""
+        )
         lava_wall_indentation += "    "
-        code += lava_wall_indentation + """objects_map.pop(f"lava wall {number_of_lava_walls + i}")\n"""
+        code += (
+            lava_wall_indentation
+            + """objects_map.pop(f"lava wall {number_of_lava_walls + i}")\n"""
+        )
         code += lava_wall_indentation + "i += 1\n"
 
         # show_ims(resulting_obs, level_number, configuration_number)
@@ -173,9 +239,14 @@ for level_number in range(0, 20):
             code += indentation + f"objects_map['fixed wall {i}'] = wall_instance{i}\n"
         code += indentation + f"number_of_walls = {len(walls)}\n"
         code += indentation + "i = 0\n"
-        code += indentation + """while(objects_map.get(f"fixed wall {number_of_walls + i}")!= None):\n"""
+        code += (
+            indentation
+            + """while(objects_map.get(f"fixed wall {number_of_walls + i}")!= None):\n"""
+        )
         indentation += "    "
-        code += indentation + """objects_map.pop(f"fixed wall {number_of_walls + i}")\n"""
+        code += (
+            indentation + """objects_map.pop(f"fixed wall {number_of_walls + i}")\n"""
+        )
         code += indentation + "i += 1\n"
 
     code += "\n"

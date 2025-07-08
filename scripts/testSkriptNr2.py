@@ -3,17 +3,18 @@ import random
 import ipdb
 from matplotlib import pyplot as plt
 import sys
-# import pathlib
-sys.path.insert(0, '../../')  # noqa
 
-from ocatari.core import OCAtari
+# import pathlib
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
 
 """
 set the ram and see whats changed
 """
 
 
-env = OCAtari("ChopperCommand", mode="vision", render_mode='human')
+env = OCAtari("ChopperCommand", mode="vision", render_mode="human")
 obs, info = env.reset()
 prevRam = None
 

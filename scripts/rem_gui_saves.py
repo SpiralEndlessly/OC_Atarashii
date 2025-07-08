@@ -5,11 +5,12 @@ from collections import deque
 from copy import deepcopy
 import pygame
 import sys
-sys.path.insert(0, '../')  # noqa
-from ocatari.core import OCAtari, UPSCALE_FACTOR
+
+sys.path.insert(0, "../")  # noqa
+from ocatarashii.core import OCAtari, UPSCALE_FACTOR
 import atexit
 import pickle
-from ocatari.vision.utils import mark_bb, make_darker
+from ocatarashii.vision.utils import mark_bb, make_darker
 from ale_py import Action
 
 """
@@ -29,9 +30,24 @@ class Renderer:
     clock: pygame.time.Clock
     env: OCAtari
 
-    def __init__(self, env_name: str, mode: str = "ram", bits: bool = False, obs_mode="obj", no_render: list = [], hud=True):
-        self.env = OCAtari(env_name, mode=mode, hud=hud, render_mode="rgb_array",
-                           render_oc_overlay=True, frameskip=1, obs_mode=obs_mode)
+    def __init__(
+        self,
+        env_name: str,
+        mode: str = "ram",
+        bits: bool = False,
+        obs_mode="obj",
+        no_render: list = [],
+        hud=True,
+    ):
+        self.env = OCAtari(
+            env_name,
+            mode=mode,
+            hud=hud,
+            render_mode="rgb_array",
+            render_oc_overlay=True,
+            frameskip=1,
+            obs_mode=obs_mode,
+        )
 
         self.bits = bits
         self.env_name = env_name
@@ -62,22 +78,29 @@ class Renderer:
         pygame.display.set_caption("OCAtari Environment")
         self.env_render_shape = sample_image.shape[:2]
         window_size = (
-            self.env_render_shape[0] + RAM_RENDER_WIDTH, self.env_render_shape[1])
+            self.env_render_shape[0] + RAM_RENDER_WIDTH,
+            self.env_render_shape[1],
+        )
         self.window = pygame.display.set_mode(window_size)
         self.clock = pygame.time.Clock()
-        self.ram_cell_id_font = pygame.font.SysFont('Pixel12x10', 25)
+        self.ram_cell_id_font = pygame.font.SysFont("Pixel12x10", 25)
         if self.bits:
-            self.ram_cell_value_font = pygame.font.SysFont('monospace', 22)
+            self.ram_cell_value_font = pygame.font.SysFont("monospace", 22)
         else:
-            self.ram_cell_value_font = pygame.font.SysFont('Pixel12x10', 30)
+            self.ram_cell_value_font = pygame.font.SysFont("Pixel12x10", 30)
 
     def run(self):
         self.running = True
         while self.running:
             self._handle_user_input()
             if not (self.frame_by_frame and not (self.next_frame)) and not self.paused:
-                self.saved_frames.append((deepcopy(self.env.get_ram()), self.env._ale.cloneState(
-                ), self.current_frame))  # ram, state, image (rgb)
+                self.saved_frames.append(
+                    (
+                        deepcopy(self.env.get_ram()),
+                        self.env._ale.cloneState(),
+                        self.current_frame,
+                    )
+                )  # ram, state, image (rgb)
                 action = self._get_action()
                 # action = self.env.get_action_meanings().index(action.name)
                 reward = self.env.step(action)[1]
@@ -148,16 +171,15 @@ class Renderer:
                                 self.env.set_ram(i, ram_v)
                             for i, value in enumerate(previous[0]):
                                 self._render_ram_cell(i, value)
-                            self.env._ale.restoreState(
-                                previous[1])  # restore state
+                            self.env._ale.restoreState(previous[1])  # restore state
                             self.current_frame = previous[2].copy()
                             self._render_atari()
                             pygame.display.flip()
                             pygame.event.pump()
                         else:
                             print(
-                                "There are no prior frames saved to go back to. Save more using the flag --previous_frames")
-
+                                "There are no prior frames saved to go back to. Save more using the flag --previous_frames"
+                            )
 
                 if event.key == pygame.K_r:  # 'R': reset
                     self.env.reset()
@@ -181,16 +203,18 @@ class Renderer:
 
                 elif event.key == pygame.K_BACKSPACE:  # remove character
                     if self.active_cell_idx is not None:
-                        self.current_active_cell_input = self.current_active_cell_input[:-1]
+                        self.current_active_cell_input = self.current_active_cell_input[
+                            :-1
+                        ]
 
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     if self.active_cell_idx is not None:
                         if len(self.current_active_cell_input) > 0:
-                            new_cell_value = int(
-                                self.current_active_cell_input)
+                            new_cell_value = int(self.current_active_cell_input)
                             if new_cell_value < 256:
                                 self._set_ram_value_at(
-                                    self.active_cell_idx, new_cell_value)
+                                    self.active_cell_idx, new_cell_value
+                                )
                         self._unselect_active_cell()
 
                 elif event.key == pygame.K_g:
@@ -213,7 +237,7 @@ class Renderer:
                     _, ax = plt.subplots(1, 1, figsize=(6, 8))
                     obs = self.env._env.render()
                     ax.imshow(obs)
-                    plt.savefig(self.env.game_name + '1.png', dpi=500)
+                    plt.savefig(self.env.game_name + "1.png", dpi=500)
                     for obj in self.env.objects:
                         x, y = obj.xy
                         if x < 160 and y < 210:
@@ -222,30 +246,50 @@ class Renderer:
                             # sur_col = make_darker(ocol)
                             mark_bb(obs, opos, color=ocol)
                     ax.imshow(obs)
-                    plt.savefig(self.env.game_name + '2.png', dpi=500)
+                    plt.savefig(self.env.game_name + "2.png", dpi=500)
 
                 elif event.key == pygame.K_h:
-                    with open("save_states/" + self.env.game_name + '_save_state1.pickle', 'wb') as handle:
-                        pickle.dump(self.env._env.env.env.ale.cloneState(
-                        ), handle, protocol=pickle.HIGHEST_PROTOCOL)
+                    with open(
+                        "save_states/" + self.env.game_name + "_save_state1.pickle",
+                        "wb",
+                    ) as handle:
+                        pickle.dump(
+                            self.env._env.env.env.ale.cloneState(),
+                            handle,
+                            protocol=pickle.HIGHEST_PROTOCOL,
+                        )
 
                 elif event.key == pygame.K_j:
-                    with open("save_states/" + self.env.game_name + '_save_state2.pickle', 'wb') as handle:
-                        pickle.dump(self.env._env.env.env.ale.cloneState(
-                        ), handle, protocol=pickle.HIGHEST_PROTOCOL)
+                    with open(
+                        "save_states/" + self.env.game_name + "_save_state2.pickle",
+                        "wb",
+                    ) as handle:
+                        pickle.dump(
+                            self.env._env.env.env.ale.cloneState(),
+                            handle,
+                            protocol=pickle.HIGHEST_PROTOCOL,
+                        )
 
                 elif event.key == pygame.K_n:
                     try:
                         snapshot = pickle.load(
-                            open("save_states/" + self.env_name + "_save_state1.pickle", "rb"))
+                            open(
+                                "save_states/" + self.env_name + "_save_state1.pickle",
+                                "rb",
+                            )
+                        )
                         self.env._env.env.env.ale.restoreState(snapshot)
                     except:
                         print("No Save_State set")
-                        
+
                 elif event.key == pygame.K_m:
                     try:
                         snapshot = pickle.load(
-                            open("save_states/" + self.env_name + "_save_state2.pickle", "rb"))
+                            open(
+                                "save_states/" + self.env_name + "_save_state2.pickle",
+                                "rb",
+                            )
+                        )
                         self.env._env.env.env.ale.restoreState(snapshot)
                     except:
                         print("No Save_State set")
@@ -342,12 +386,12 @@ class Renderer:
             if self.bits:
                 try:
                     text = self.ram_cell_value_font.render(
-                        str(format(value, '08b')), True, color, None)
+                        str(format(value, "08b")), True, color, None
+                    )
                 except:
                     pass
             else:
-                text = self.ram_cell_value_font.render(
-                    str(value), True, color, None)
+                text = self.ram_cell_value_font.render(str(value), True, color, None)
             text_rect = text.get_rect()
             text_rect.bottomright = (x + w - 2, y + h - 2)
             self.window.blit(text, text_rect)
@@ -422,8 +466,9 @@ class Renderer:
 
 
 if __name__ == "__main__":
-    renderer = Renderer(env_name="Robotank", mode="ram",
-                        bits=False, obs_mode="obj", hud=True)
+    renderer = Renderer(
+        env_name="Robotank", mode="ram", bits=False, obs_mode="obj", hud=True
+    )
 
     def exit_handler():
         if renderer.no_render:
@@ -431,5 +476,6 @@ if __name__ == "__main__":
             for i in sorted(renderer.no_render):
                 print(i, end=" ")
             print("")
+
     atexit.register(exit_handler)
     renderer.run()

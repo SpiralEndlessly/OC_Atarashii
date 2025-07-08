@@ -2,7 +2,8 @@
 Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
-# appends parent path to syspath to make ocatari importable
+
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -13,8 +14,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
-sys.path.insert(0, '../ocatari') # noqa
-from ocatari.core import OCAtari
+
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
 import pickle
 
 DROP_LOW = True
@@ -35,7 +37,7 @@ env.reset()
 dico = {}
 for i in range(128):
     env._ale.restoreState(snapshot)
-    env.set_ram(44, 2*i)
+    env.set_ram(44, 2 * i)
     obs, reward, terminated, truncated, info = env.step(0)
     color = obs[147, 89]
     dico[i] = tuple(color)

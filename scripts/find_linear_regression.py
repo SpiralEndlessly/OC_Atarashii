@@ -2,9 +2,11 @@
 Demo script that allows me to find the linear relation between selected ram states and
 detected objects through vision in game
 """
+
 import pathlib
 import pickle
-# appends parent path to syspath to make ocatari importable
+
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 from copy import deepcopy
@@ -15,39 +17,79 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
-sys.path.insert(0, '../ocatari')  # noqa
-from ocatari.core import OCAtari
-from ocatari.utils import load_agent, parser, make_deterministic
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
+from ocatarashii.utils import load_agent, parser, make_deterministic
 
 # IMPORTANT: sets the actions of the player during the acquisition of the data.
 actions = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4] + [0] * 400
 # Coefficients below this value will be ignored.
 SIGNIFICANCE_THRESHOLD = 0.1
 
-parser.add_argument("-g", "--game", type=str, required=True,
-                    help="game to evaluate (e.g. 'Pong')")
-parser.add_argument("-to", "--tracked_object", type=str, default=["Player"], nargs=1,
-                    help="A list of objects to track")
-parser.add_argument("-tp", "--tracked_property", type=str, default=['x'], nargs=1,
-                    help="A list of properties to track for each object")
-parser.add_argument("-tr", "--tracked_rams", type=int, nargs='+',
-                    help="A list of the ram emplacements to use for the linear regression \n"
-                         "Note: Can put the same ram emplacement twice and elevate it to different degrees")
-parser.add_argument("-d", "--degrees", type=int, nargs='*',
-                    help="The degree to elevate each of the ram values used in the ")
-parser.add_argument("-tn", "--top_n", type=int, default=3,
-                    help="The top n value to be kept in the correlation matrix")
-parser.add_argument("-ns", "--nb_samples", type=int, default=1000,
-                    help="The number of samples to use.")
+parser.add_argument(
+    "-g", "--game", type=str, required=True, help="game to evaluate (e.g. 'Pong')"
+)
+parser.add_argument(
+    "-to",
+    "--tracked_object",
+    type=str,
+    default=["Player"],
+    nargs=1,
+    help="A list of objects to track",
+)
+parser.add_argument(
+    "-tp",
+    "--tracked_property",
+    type=str,
+    default=["x"],
+    nargs=1,
+    help="A list of properties to track for each object",
+)
+parser.add_argument(
+    "-tr",
+    "--tracked_rams",
+    type=int,
+    nargs="+",
+    help="A list of the ram emplacements to use for the linear regression \n"
+    "Note: Can put the same ram emplacement twice and elevate it to different degrees",
+)
+parser.add_argument(
+    "-d",
+    "--degrees",
+    type=int,
+    nargs="*",
+    help="The degree to elevate each of the ram values used in the ",
+)
+parser.add_argument(
+    "-tn",
+    "--top_n",
+    type=int,
+    default=3,
+    help="The top n value to be kept in the correlation matrix",
+)
+parser.add_argument(
+    "-ns", "--nb_samples", type=int, default=1000, help="The number of samples to use."
+)
 parser.add_argument("-dqn", "--dqn", action="store_true", help="Use DQN agent")
-parser.add_argument("-s", "--seed", default=0,
-                    help="Seed to make everything deterministic")
-parser.add_argument("-r", "--render", action="store_true",
-                    help="If provided, renders")
-parser.add_argument("-m", "--method", type=str, default="pearson", choices={"pearson", "spearman", "kendall"},
-                    help="The method to use for computing the correlation")
-parser.add_argument("-snap", "--snapshot", type=str, default=None,
-                    help="Path to an emulator state snapshot to start from.")
+parser.add_argument(
+    "-s", "--seed", default=0, help="Seed to make everything deterministic"
+)
+parser.add_argument("-r", "--render", action="store_true", help="If provided, renders")
+parser.add_argument(
+    "-m",
+    "--method",
+    type=str,
+    default="pearson",
+    choices={"pearson", "spearman", "kendall"},
+    help="The method to use for computing the correlation",
+)
+parser.add_argument(
+    "-snap",
+    "--snapshot",
+    type=str,
+    default=None,
+    help="Path to an emulator state snapshot to start from.",
+)
 opts = parser.parse_args()
 
 if opts.degrees is None:
@@ -55,7 +97,8 @@ if opts.degrees is None:
 else:
     if len(opts.tracked_rams) != len(opts.degrees):
         raise ValueError(
-            'The degrees list must have the same length as the number of rams value to take into account')
+            "The degrees list must have the same length as the number of rams value to take into account"
+        )
 
 MODE = "vision"
 if opts.render:
@@ -80,7 +123,7 @@ if opts.dqn:
         dqn_agent = load_agent(opts, env.action_space.n)
     except FileNotFoundError:
         oc_atari_dir = pathlib.Path(__file__).parents[1].resolve()
-        opts.path = str(oc_atari_dir / 'models' / f"{opts.game}" / 'dqn.gz')
+        opts.path = str(oc_atari_dir / "models" / f"{opts.game}" / "dqn.gz")
         dqn_agent = load_agent(opts, env.action_space.n)
 
 ram_saves = []
@@ -102,9 +145,13 @@ for i in tqdm(range(opts.nb_samples)):
         action = actions[i % len(actions)]
     obs, reward, terminated, truncated, info = env.step(action)
 
-    if info.get('frame_number') > 10 and i % 1 == 0:
+    if info.get("frame_number") > 10 and i % 1 == 0:
         SKIP = False
-        for obj_name in opts.tracked_object:  # avoid state without the tracked objects or with several
+        for (
+            obj_name
+        ) in (
+            opts.tracked_object
+        ):  # avoid state without the tracked objects or with several
             if str(env.objects).count(f"{obj_name} at") != 1:
                 SKIP = True
                 break
@@ -132,8 +179,11 @@ if len(ram_saves) == 0:
     print("No data point was taken")
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(
-    128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 X = []
 y = tracked_property_values
 unchanged_rams = []
@@ -151,7 +201,8 @@ for j in range(len(opts.tracked_rams)):
         X.append(list(map(lambda x: pow(x, degree), from_rams[str(ram)])))
     except KeyError:
         print(
-            f"the ram located at the emplace number {ram} doesn't change during the duration of the acquisition.")
+            f"the ram located at the emplace number {ram} doesn't change during the duration of the acquisition."
+        )
         unchanged_rams.append(ram)
 
 # Fitting of the model
@@ -160,14 +211,16 @@ try:
     reg = LinearRegression().fit(X, np.array(y))
 except ValueError:
     raise ValueError(
-        "Only ram emplacements with unchanged values throughout the acquisition were given.")
+        "Only ram emplacements with unchanged values throughout the acquisition were given."
+    )
 
 coeffs = reg.coef_
 coeffs[np.abs(coeffs) < SIGNIFICANCE_THRESHOLD] = 0
 coeffs = np.round(coeffs, decimals=ceil(abs(np.log10(SIGNIFICANCE_THRESHOLD))))
 approximate_reg = LinearRegression()
-approximate_reg.intercept_ = reg.intercept_ if abs(
-    reg.intercept_) > SIGNIFICANCE_THRESHOLD else 0
+approximate_reg.intercept_ = (
+    reg.intercept_ if abs(reg.intercept_) > SIGNIFICANCE_THRESHOLD else 0
+)
 approximate_reg.coef_ = coeffs
 
 # Display the result
@@ -178,7 +231,9 @@ for i in range(len(opts.tracked_rams)):
     if opts.tracked_rams[i] not in unchanged_rams and coeffs[i] != 0:
         if i != len(opts.tracked_rams) - 1:
             final_expression += f"{coeffs[i]} * (ram_state[{opts.tracked_rams[i]}]"
-            final_expression += f"**{opts.degrees[i]}) +" if opts.degrees[i] != 1 else ") +"
+            final_expression += (
+                f"**{opts.degrees[i]}) +" if opts.degrees[i] != 1 else ") +"
+            )
         else:
             final_expression += f"{coeffs[i]} * (ram_state[{opts.tracked_rams[i]}]"
             final_expression += f"**{opts.degrees[i]})" if opts.degrees[i] != 1 else ")"

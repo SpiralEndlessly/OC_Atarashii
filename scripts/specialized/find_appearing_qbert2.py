@@ -3,7 +3,7 @@ Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -14,18 +14,23 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
-sys.path.insert(0, '../ocatari') # noqa
-from ocatari.core import OCAtari
+
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
 from alive_progress import alive_bar
-from ocatari.utils import load_agent, make_deterministic
+from ocatarashii.utils import load_agent, make_deterministic
 from time import sleep
 
 
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=10, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=10,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
 
@@ -58,18 +63,39 @@ for obj in object_list:
 ram_saves = []
 actions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 actions = ([5] * 18 + [4] * 5) * 4 + 50 * [3]
+
+
 class Options(object):
     pass
+
+
 opts = Options()
 opts.path = "models/QBert/dqn.gz"
 dqn_agent = load_agent(opts, env.action_space.n)
 
-_cubes_cinfo=[        21,               # row of 1
-                    52,  54,            # row of 2
-                 83, 85,  87,           # row of 3
-               98, 100, 102, 104,       # row of 4
-              1,  3,   5,   7,  9,      # row of 5
-            32, 34, 36,  38,  40, 42]   # row of 6
+_cubes_cinfo = [
+    21,  # row of 1
+    52,
+    54,  # row of 2
+    83,
+    85,
+    87,  # row of 3
+    98,
+    100,
+    102,
+    104,  # row of 4
+    1,
+    3,
+    5,
+    7,
+    9,  # row of 5
+    32,
+    34,
+    36,
+    38,
+    40,
+    42,
+]  # row of 6
 
 to_exclude = _cubes_cinfo + [112, 122]  # disks
 
@@ -79,7 +105,7 @@ ram_saves.append(env._env.unwrapped.ale.getRAM())
 potentials = set(np.arange(128))
 previous = None
 for i in tqdm(range(NB_SAMPLES)):
-# for i in range(NB_SAMPLES):
+    # for i in range(NB_SAMPLES):
     # obs, reward, terminated, truncated, info = env.step(random.randint(0, env.action_space.n-1))
     action = dqn_agent.draw_action(env.dqn_obs)
     # action = random.randint(1, 5)
@@ -89,11 +115,11 @@ for i in tqdm(range(NB_SAMPLES)):
     obs, reward, terminated, truncated, info = env.step(action)
     ram = env._env.unwrapped.ale.getRAM()
     # print(ram[75:80])
-    env.set_ram(119, 5) # no purple
+    env.set_ram(119, 5)  # no purple
     if i % 300 == 0:
         env.set_ram(103, 17)
     if i % 40:
-        env.set_ram(105, 5) # no peer
+        env.set_ram(105, 5)  # no peer
     # print(ram[103])
     # if i > 100:
     #     sleep(0.1)
@@ -102,7 +128,10 @@ for i in tqdm(range(NB_SAMPLES)):
         if terminated:
             env.reset()
         for obj_name in object_list:  # avoid state without the tracked objects
-            if str(env.objects).count("GreenBall") == 0 and str(env.objects).count("PurpleBall") == 1:
+            if (
+                str(env.objects).count("GreenBall") == 0
+                and str(env.objects).count("PurpleBall") == 1
+            ):
                 print(ram[75:80])
                 sleep(0.5)
                 pass
@@ -131,16 +160,22 @@ for i in tqdm(range(NB_SAMPLES)):
                     # objects_infos[f"{obj_name}_y"].append(obj.xy[1])
                 # objects_infos[f"{obj_name}_y"].append(obj.xy[1])
                 prev_x = obj.xy[0]
-        
+
         # ram_saves.append(deepcopy(ram))
 env.close()
 
 ram_saves.pop(-1)
 
-import ipdb; ipdb.set_trace()
+import ipdb
+
+ipdb.set_trace()
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0]) and i not in to_exclude}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0]) and i not in to_exclude
+}
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
 
@@ -169,7 +204,9 @@ if DROP_LOW:
     corr = corr.loc[:, (corr.abs() > MIN_CORRELATION).any()]
 
 # if METHOD == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -179,7 +216,7 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 
@@ -199,4 +236,3 @@ for el in corrT:
     plt.xlabel(idx)
     plt.ylabel(el)
     plt.show()
-

@@ -5,12 +5,12 @@ from copy import deepcopy
 import gymnasium as gym
 import ipdb
 
-from ocatari.utils import *
-from ocatari.core import OCAtari
+from ocatarashii.utils import *
+from ocatarashii.core import OCAtari
 from matplotlib import pyplot as plt
 from pynput import keyboard
 
-from ocatari.vision.utils import make_darker, mark_bb
+from ocatarashii.vision.utils import make_darker, mark_bb
 
 
 # running this file will start the game in multiple different ways given by the following variables:
@@ -20,9 +20,9 @@ useOCAtari = True
 printEnvInfo = False
 
 # OCAtari modes
-mode = "vision"                    # ram, vision, test
-mode = "ram"                    # ram, vision, test
-HUD = True                      # if True, the returned objects are only the necessary ones
+mode = "vision"  # ram, vision, test
+mode = "ram"  # ram, vision, test
+HUD = True  # if True, the returned objects are only the necessary ones
 
 # gym[atari]/gymnasium
 # game name, e.g.: ChopperCommand-v4, Pong, Boxing or ...
@@ -30,53 +30,72 @@ game_name = "ChopperCommand-v4"
 # render_mode => "rgb_array" is advised, when playing
 render_mode = "rgb_array"
 # => "human" to also get the normal representation to compare between object extraction and default
-seed = 42                       # resetting environment seed
-fps = 30                        # render fps
+seed = 42  # resetting environment seed
+fps = 30  # render fps
 
 
 # actions
 # possible action inputs given by a run with showInputs = True
 # number of actions that will be performed until the environment shuts down automatically
 performActions = 30000
-INPUTS = ['NOOP', 'FIRE', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UPRIGHT', 'UPLEFT', 'DOWNRIGHT', 'DOWNLEFT', 'UPFIRE',
-          'RIGHTFIRE', 'LEFTFIRE', 'DOWNFIRE', 'UPRIGHTFIRE', 'UPLEFTFIRE', 'DOWNRIGHTFIRE', 'DOWNLEFTFIRE']
-playGame = True                # if True, enables inputs if you want to play
-key_map = {                     # the inputs mapped to the possible basic actions
-    'f': 'FIRE',                    # -> every other action should be a combination of them
-    'up': 'UP',
-    'right': 'RIGHT',
-    'left': 'LEFT',
-    'down': 'DOWN'}
+INPUTS = [
+    "NOOP",
+    "FIRE",
+    "UP",
+    "RIGHT",
+    "LEFT",
+    "DOWN",
+    "UPRIGHT",
+    "UPLEFT",
+    "DOWNRIGHT",
+    "DOWNLEFT",
+    "UPFIRE",
+    "RIGHTFIRE",
+    "LEFTFIRE",
+    "DOWNFIRE",
+    "UPRIGHTFIRE",
+    "UPLEFTFIRE",
+    "DOWNRIGHTFIRE",
+    "DOWNLEFTFIRE",
+]
+playGame = True  # if True, enables inputs if you want to play
+key_map = {  # the inputs mapped to the possible basic actions
+    "f": "FIRE",  # -> every other action should be a combination of them
+    "up": "UP",
+    "right": "RIGHT",
+    "left": "LEFT",
+    "down": "DOWN",
+}
 # the set of active basic actions (related to the currently pressed keys)
 isActive = set()
 # the default action if nothing is pressed or a false combination is pressed
-default_action = 'NOOP'
-actionSequence = []             # only used if playGame is False
+default_action = "NOOP"
+actionSequence = []  # only used if playGame is False
 # -> repeats the action sequence until the number of actions reaches performActions
 # -> if no sequence is defined, it repeats random actions instead
 
 # get valuable information for reversed engineering purposes and others
 # if True, prints the number and the description of the possible inputs (actions)
 showInputs = True
-showActions = False             # if True, prints the action that will be done
-showRAM = False                 # if True, prints the RAM to the console
-showImage = True                # if True, plots the image
-printRGB = False                # if True, prints the rgb array
-slowDownPlot = 0.001            # pause per iteration
+showActions = False  # if True, prints the action that will be done
+showRAM = False  # if True, prints the RAM to the console
+showImage = True  # if True, plots the image
+printRGB = False  # if True, prints the rgb array
+slowDownPlot = 0.001  # pause per iteration
 # RAM manipulation
-manipulateRAM = False           # if True, you can set the RAM by an index
-setRAMIndex = 72                # the index of the ram that will be set
+manipulateRAM = False  # if True, you can set the RAM by an index
+setRAMIndex = 72  # the index of the ram that will be set
 # the value of the ram that will be set (if negative, then it counts up)
 setRAMValue = 10
 # shows any other changes that occurred by changing the ram (dependent on env.step)
 showDelta = False
 lastRAM = np.zeros(128)
-ipdb_delay = 0                  # delay of ipdb interrupt and chance to use the plot
+ipdb_delay = 0  # delay of ipdb interrupt and chance to use the plot
 
 # DO NOT CHANGE! global variables used in context of the key control
-pause = False                   # press tab to pause
-end = False                     # press esc to end
-ipdb_pause = False              # press i to interrupt with ipdb
+pause = False  # press tab to pause
+end = False  # press esc to end
+ipdb_pause = False  # press i to interrupt with ipdb
 interrupted = False
 
 
@@ -87,18 +106,17 @@ def with_gym():
     # set up environment
     env = gym.make(game_name, render_mode=render_mode)
     env.reset(seed=seed)
-    env.metadata['render_fps'] = fps
+    env.metadata["render_fps"] = fps
 
     run(env)
 
 
-def with_ocatari():
+def with_ocatarashii():
     """
     Sets up the gym environment wrapped into the OCAtari2.0 and runs the game
     """
     # set up environment
-    oc = OCAtari(env_name=game_name, mode=mode,
-                 hud=HUD, render_mode=render_mode)
+    oc = OCAtari(env_name=game_name, mode=mode, hud=HUD, render_mode=render_mode)
     oc.reset(seed=seed)
     # oc.metadata['render_fps'] = fps, access to this would be nice ???
 
@@ -208,7 +226,7 @@ def run(env):
                     # change rgb a tiny bit, so that it is distinguishable from the objects color
                     bb_color = make_darker(object_color)
                     r, g, b = bb_color
-                    if r+g+b <= 20:
+                    if r + g + b <= 20:
                         bb_color = 255, 255, 255
                     mark_bb(observation, object_position, color=bb_color)
             image = observation
@@ -238,7 +256,7 @@ def run(env):
 
             # ending must be possible
             if end:
-                plt.close('all')
+                plt.close("all")
                 break
 
         # ipdb interrupt
@@ -249,7 +267,7 @@ def run(env):
 
         # if escaped, end the program
         if end:
-            plt.close('all')
+            plt.close("all")
             break
 
     # close the environment at the end
@@ -277,7 +295,7 @@ def print_environment_info(env, observation, reward, info):
         return
 
     if useOCAtari:
-        # Besides the extraction, ocatari gives back valuable information
+        # Besides the extraction, ocatarashii gives back valuable information
         if mode == "raw":
             print("raw data:\n", info)
         elif mode == "ram":
@@ -337,13 +355,13 @@ def on_press(key):
         key_name = str(key)
         if key_name.startswith("Key."):
             key_name = key_name[4:]
-        if "\'" in key_name:
-            key_name = key_name.replace("\'", "")
+        if "'" in key_name:
+            key_name = key_name.replace("'", "")
         # key_name = key_name.removeprefix("\'")
         # key_name = key_name.removesuffix("\'")
 
         # ipdb
-        if key_name == 'i':
+        if key_name == "i":
             ipdb_pause = True
 
         # game control given by the key_map => add inputs to the list of active keys
@@ -363,8 +381,8 @@ def on_release(key):
         key_name = str(key)
         if key_name.startswith("Key."):
             key_name = key_name[4:]
-        if "\'" in key_name:
-            key_name = key_name.replace("\'", "")
+        if "'" in key_name:
+            key_name = key_name.replace("'", "")
         # key_name = key_name.removeprefix("Key.")
         # key_name = key_name.removeprefix("\'")
         # key_name = key_name.removesuffix("\'")
@@ -401,6 +419,6 @@ def get_action_name(my_set=None):
 
 
 if useOCAtari:
-    with_ocatari()
+    with_ocatarashii()
 else:
     with_gym()

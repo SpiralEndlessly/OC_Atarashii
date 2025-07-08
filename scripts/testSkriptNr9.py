@@ -5,10 +5,11 @@ from matplotlib import pyplot as plt
 import sys
 import os
 import numpy as np
-# import pathlib
-sys.path.insert(0, '../../')  # noqa
 
-from ocatari.core import OCAtari
+# import pathlib
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
 
 """
 set the ram and see whats changed
@@ -20,7 +21,7 @@ seed = 42
 frameskip = 1
 
 # Seeding
-os.environ['PYTHONHASHSEED'] = str(seed)
+os.environ["PYTHONHASHSEED"] = str(seed)
 # torch.use_deterministic_algorithms(args.torch_deterministic)
 # torch.backends.cudnn.deterministic = args.torch_deterministic
 # torch.backends.cudnn.benchmark = False
@@ -28,8 +29,15 @@ os.environ['PYTHONHASHSEED'] = str(seed)
 random.seed(seed)
 np.random.seed(seed)
 
-env = OCAtari(env_id, hud=False, render_mode="rgb_array", mode="ram",
-              render_oc_overlay=False, obs_mode=obs_mode, frameskip=1)
+env = OCAtari(
+    env_id,
+    hud=False,
+    render_mode="rgb_array",
+    mode="ram",
+    render_oc_overlay=False,
+    obs_mode=obs_mode,
+    frameskip=1,
+)
 
 
 env.action_space.seed(seed)
@@ -45,8 +53,15 @@ for _ in range(100):
 obs1 = obs
 print("---")
 
-env = OCAtari(env_id, hud=False, render_mode="rgb_array", mode="vision",
-              render_oc_overlay=False, obs_mode=obs_mode, frameskip=1)
+env = OCAtari(
+    env_id,
+    hud=False,
+    render_mode="rgb_array",
+    mode="vision",
+    render_oc_overlay=False,
+    obs_mode=obs_mode,
+    frameskip=1,
+)
 
 env.action_space.seed(seed)
 

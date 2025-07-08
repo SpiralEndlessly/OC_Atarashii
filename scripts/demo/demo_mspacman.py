@@ -1,18 +1,19 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
 import matplotlib.pyplot as plt
-sys.path.insert(0, '../../') # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.utils import load_agent, parser
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.utils import load_agent, parser
 
 game_name = "MsPacman"
 MODE = "revised"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 
 opts = parser.parse_args()
@@ -28,12 +29,11 @@ for i in range(10000000):
         action = random.randint(0, 4)
     obs, reward, terminated, truncated, info = env.step(action)
 
-    
     if i % 1 == 0 and i > 50:
         # obse2 = deepcopy(obse)
         print(env.objects)
         ram = env._env.unwrapped.ale.getRAM()
-        print(format(int(ram[63]), 'b').zfill(8))
+        print(format(int(ram[63]), "b").zfill(8))
         for obj in env.objects:
             x, y = obj.xy
             if x < 160 and y < 210:

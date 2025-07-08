@@ -1,27 +1,38 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
 import matplotlib.pyplot as plt
 from os import path
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
-from ocatari.core import OCAtari, HideEnemyPong
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.vision.spaceinvaders import objects_colors
-from ocatari.vision.pong import objects_colors
-from ocatari.utils import AtariNet, make_deterministic, _load_checkpoint
+from ocatarashii.core import OCAtari, HideEnemyPong
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.vision.spaceinvaders import objects_colors
+from ocatarashii.vision.pong import objects_colors
+from ocatarashii.utils import AtariNet, make_deterministic, _load_checkpoint
 import numpy as np
 
 
-render_mode = 'human'
-render_mode = 'rgb_array'
+render_mode = "human"
+render_mode = "rgb_array"
 
 if "hide" in sys.argv:
-    env = HideEnemyPong("PongDeterministic-v0", mode="ram",
-                        render_mode=render_mode, hud=False, obs_mode='dqn')
+    env = HideEnemyPong(
+        "PongDeterministic-v0",
+        mode="ram",
+        render_mode=render_mode,
+        hud=False,
+        obs_mode="dqn",
+    )
 else:
-    env = OCAtari("PongDeterministic-v0", mode="ram",
-                  render_mode=render_mode, hud=False, obs_mode='dqn')
+    env = OCAtari(
+        "PongDeterministic-v0",
+        mode="ram",
+        render_mode=render_mode,
+        hud=False,
+        obs_mode="dqn",
+    )
 observation, info = env.reset()
 AGENT_TYPE = "dqn"
 agent = AtariNet(env.nb_actions, distributional=False)

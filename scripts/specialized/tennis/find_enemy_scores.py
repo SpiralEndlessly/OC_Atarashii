@@ -2,8 +2,10 @@
 Demo script that allows me to find the game mode (the orientation of the
 field) in Tennis
 """
+
 import random
 import matplotlib.pyplot as plt
+
 # from copy import deepcopy
 # from tqdm import tqdm
 import numpy as np
@@ -12,8 +14,9 @@ import seaborn as sns
 import pickle
 import ipdb
 import sys
+
 # import pathlib
-sys.path.insert(0, '../../ocatari') # noqa
+sys.path.insert(0, "../../ocatarashii")  # noqa
 from core import OCAtari
 
 DROP_LOW = True
@@ -50,13 +53,17 @@ MODE_CHANGED = False
 # pickle.dump(modes, open('dumps/scores.pkl', 'wb'))
 
 
-ram_saves = pickle.load(open('../../dumps/ram_saves_sc.pkl', 'rb'))
-modes = pickle.load(open('../../dumps/scores.pkl', 'rb'))
+ram_saves = pickle.load(open("../../dumps/ram_saves_sc.pkl", "rb"))
+modes = pickle.load(open("../../dumps/scores.pkl", "rb"))
 
 objects_infos["scores"] = modes
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
 
@@ -74,7 +81,9 @@ corr.drop(subset, axis=1, inplace=True)
 # if DROP_LOW:
 #     corr = corr[corr.columns[[corr.abs().max() > MIN_CORRELATION]]]
 
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 
 ipdb.set_trace()
 
@@ -82,7 +91,7 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 

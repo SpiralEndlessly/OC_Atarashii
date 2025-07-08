@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 
 # Define the root directory of the project
-PROJECT_PATH = Path("./ocatari/")
+PROJECT_PATH = Path("./ocatarashii/")
 
 # Collect all Python files recursively
 PYTHON_FILES = [file for file in PROJECT_PATH.rglob("*.py")]

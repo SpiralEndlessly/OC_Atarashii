@@ -1,18 +1,16 @@
-from ocatari.utils import load_agent
-from ocatari import OCAtari
+from ocatarashii.utils import load_agent
+from ocatarashii import OCAtari
 import sys
 import torch
-sys.path.insert(0, '../')  # noqa
+
+sys.path.insert(0, "../")  # noqa
 import gymnasium as gym
 import pygame
 import argparse
 
-parser = argparse.ArgumentParser(
-    description="OCAtari run.py Argument Setter")
+parser = argparse.ArgumentParser(description="OCAtari run.py Argument Setter")
 
-parser.add_argument(
-    "-g", "--game", type=str, default="Seaquest", help="Game to be run"
-)
+parser.add_argument("-g", "--game", type=str, default="Seaquest", help="Game to be run")
 
 parser.add_argument(
     "-a",
@@ -84,9 +82,7 @@ while not done:
     # Human intervention to end the run
     events = pygame.event.get()
     for event in events:
-        if (
-            event.type == pygame.KEYDOWN and event.key == pygame.K_q
-        ):  # 'Q': Quit
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_q:  # 'Q': Quit
             done = True
     if args.agent:
         dqn_obs = torch.Tensor(obs).unsqueeze(0)

@@ -3,7 +3,7 @@ Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -14,18 +14,24 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
-sys.path.insert(0, '../ocatari') # noqa
-from ocatari.core import OCAtari
+
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
+
 # from alive_progress import alive_bar
-from ocatari.utils import load_agent, make_deterministic
+from ocatarashii.utils import load_agent, make_deterministic
 from time import sleep
 
 
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=50, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=50,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
 
@@ -54,15 +60,19 @@ for obj in object_list:
 ram_saves = []
 actions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 actions = ([5] * 18 + [4] * 5) * 4 + 50 * [3]
+
+
 class Options(object):
     pass
+
+
 opts = Options()
 opts.path = "models/Seaquest/dqn.gz"
 dqn_agent = load_agent(opts, env.action_space.n)
 
 
 for i in tqdm(range(NB_SAMPLES)):
-# for i in range(NB_SAMPLES):
+    # for i in range(NB_SAMPLES):
     # obs, reward, terminated, truncated, info = env.step(random.randint(0, env.action_space.n-1))
     action = dqn_agent.draw_action(env.dqn_obs)
     # action = random.randint(1, 5)
@@ -95,7 +105,11 @@ if len(ram_saves) == 0:
     print("No data point was taken")
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
 
@@ -125,7 +139,9 @@ if DROP_LOW:
     corr = corr.loc[:, (corr.abs() > MIN_CORRELATION).any()]
 
 # if METHOD == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -135,7 +151,7 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 
@@ -149,7 +165,7 @@ for el in corrT:
     keys = corrT[el].keys()
     for idx in range(len(keys)):
         maxval = corrT[el].abs()[keys[idx]]
-        #idx = corrT[el].abs()
+        # idx = corrT[el].abs()
         if maxval > 0.8:
             x, y = df[keys[idx]], df[el]
             # a, b = np.polyfit(x, y, deg=1)
@@ -160,5 +176,3 @@ for el in corrT:
             plt.xlabel(keys[idx])
             plt.ylabel(el)
             plt.show()
-
-

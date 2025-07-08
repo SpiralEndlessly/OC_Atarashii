@@ -3,7 +3,7 @@ Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -14,18 +14,22 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
-sys.path.insert(0, '../ocatari') # noqa
-from ocatari.core import OCAtari
-from alive_progress import alive_bar
-from ocatari.utils import load_agent, make_deterministic
 
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
+from alive_progress import alive_bar
+from ocatarashii.utils import load_agent, make_deterministic
 
 
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=50, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=50,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
 
@@ -52,8 +56,12 @@ for obj in object_list:
     subset.append(f"{obj}")
 ram_saves = []
 actions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+
 class Options(object):
     pass
+
+
 opts = Options()
 opts.path = "models/Riverraid/dqn.gz"
 dqn_agent = load_agent(opts, env.action_space.n)
@@ -72,7 +80,7 @@ for i in range(NB_SAMPLES):
     # env.set_ram(105, 0)
     if i and i % 400 == 0:
         env.set_ram(103, 2)
-    if info.get('frame_number') > 10 and i % 5 == 0:
+    if info.get("frame_number") > 10 and i % 5 == 0:
         SKIP = False
         # print(env.objects)
         # print(env.objects)
@@ -88,7 +96,7 @@ for i in range(NB_SAMPLES):
                 # break
         # if str(env.objects).count("Projectile at (75,") == 0:
         #     print(env._env.unwrapped.ale.getRAM()[106])
-        if SKIP:# or env.objects[-2].y < env.objects[-1].y:
+        if SKIP:  # or env.objects[-2].y < env.objects[-1].y:
             continue
         ram_saves.append(deepcopy(ram))
         # for obj in env.objects:
@@ -96,18 +104,24 @@ for i in range(NB_SAMPLES):
         #     if objname in object_list:
         #         objects_infos[f"{objname}_x"].append(obj.xy[0])
         #         objects_infos[f"{objname}_y"].append(obj.xy[1])
-            # n += 1
-        
+        # n += 1
+
         # env.render()
 
     # modify and display render
 env.close()
 
 
-import ipdb; ipdb.set_trace()
+import ipdb
+
+ipdb.set_trace()
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
 
@@ -136,7 +150,9 @@ if DROP_LOW:
     corr = corr.loc[:, (corr.abs() > MIN_CORRELATION).any()]
 
 # if METHOD == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -146,7 +162,7 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 
@@ -167,4 +183,3 @@ for el in corrT:
         plt.xlabel(idx)
         plt.ylabel(el)
         plt.show()
-

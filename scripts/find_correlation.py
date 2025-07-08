@@ -3,7 +3,7 @@ Demo script that allows to find the correlation between ram states and
 detected objects through vision in a specified game.
 """
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import ipdb
 import sys
@@ -17,9 +17,10 @@ import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
 from os import path
 import pathlib
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
-from ocatari.core import OCAtari
-from ocatari.utils import parser, load_agent, make_deterministic
+from ocatarashii.core import OCAtari
+from ocatarashii.utils import parser, load_agent, make_deterministic
 import pickle
 from time import sleep
 
@@ -29,45 +30,83 @@ def binarize(ram):
 
 
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=15, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=15,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
 
 
-parser.add_argument("-g", "--game", type=str, required=True,
-                    help="game to evaluate (e.g. 'Pong')")
-parser.add_argument("-to", "--tracked_objects", type=str, default=["Player"], nargs='+',
-                    help="A list of objects to track")
-parser.add_argument("-tp", "--tracked_properties", type=str, default=['x', 'y'], nargs='+',
-                    help="A list of properties to track for each object")
-parser.add_argument("-tn", "--top_n", type=int, default=3,
-                    help="The top n value to be kept in the correlation matrix")
-parser.add_argument("-ns", "--nb_samples", type=int, default=1000,
-                    help="The number of samples to use.")
+parser.add_argument(
+    "-g", "--game", type=str, required=True, help="game to evaluate (e.g. 'Pong')"
+)
+parser.add_argument(
+    "-to",
+    "--tracked_objects",
+    type=str,
+    default=["Player"],
+    nargs="+",
+    help="A list of objects to track",
+)
+parser.add_argument(
+    "-tp",
+    "--tracked_properties",
+    type=str,
+    default=["x", "y"],
+    nargs="+",
+    help="A list of properties to track for each object",
+)
+parser.add_argument(
+    "-tn",
+    "--top_n",
+    type=int,
+    default=3,
+    help="The top n value to be kept in the correlation matrix",
+)
+parser.add_argument(
+    "-ns", "--nb_samples", type=int, default=1000, help="The number of samples to use."
+)
 parser.add_argument("-dqn", "--dqn", action="store_true", help="Use DQN agent")
-parser.add_argument("-s", "--seed", default=0,
-                    help="Seed to make everything deterministic")
-parser.add_argument("-r", "--render", action="store_true",
-                    help="If provided, renders")
-parser.add_argument("-m", "--method", type=str, default="pearson", choices={"pearson", "spearman", "kendall"},
-                    help="The method to use for computing the correlation")
-parser.add_argument("-snap", "--snapshot", type=str, default=None,
-                    help="Path to an emulator state snapshot to start from.")
-parser.add_argument("-hud", "--hud", action="store_true",
-                    help="Track HUD objects")
-parser.add_argument("-b", "--binary", action="store_true",
-                    help="Convert RAMs to binary")
-parser.add_argument("-pr", "--presence", action="store_true",
-                    help="Track presence/absence of objects")
+parser.add_argument(
+    "-s", "--seed", default=0, help="Seed to make everything deterministic"
+)
+parser.add_argument("-r", "--render", action="store_true", help="If provided, renders")
+parser.add_argument(
+    "-m",
+    "--method",
+    type=str,
+    default="pearson",
+    choices={"pearson", "spearman", "kendall"},
+    help="The method to use for computing the correlation",
+)
+parser.add_argument(
+    "-snap",
+    "--snapshot",
+    type=str,
+    default=None,
+    help="Path to an emulator state snapshot to start from.",
+)
+parser.add_argument("-hud", "--hud", action="store_true", help="Track HUD objects")
+parser.add_argument(
+    "-b", "--binary", action="store_true", help="Convert RAMs to binary"
+)
+parser.add_argument(
+    "-pr", "--presence", action="store_true", help="Track presence/absence of objects"
+)
 opts = parser.parse_args()
 
 if opts.binary:
     _convert = binarize
 else:
-    def _convert(x): return x
+
+    def _convert(x):
+        return x
+
 
 MODE = "vision"
 if opts.render:
@@ -101,25 +140,26 @@ if opts.dqn:
         dqn_agent = load_agent(opts, env.action_space.n)
     except FileNotFoundError:
         oc_atari_dir = pathlib.Path(__file__).parents[1].resolve()
-        opts.path = str(oc_atari_dir / 'models' / f"{opts.game}" / 'dqn.gz')
+        opts.path = str(oc_atari_dir / "models" / f"{opts.game}" / "dqn.gz")
         dqn_agent = load_agent(opts, env.action_space.n)
 
 
 ram_saves = []
-for i in tqdm(range(opts.nb_samples*5)):
+for i in tqdm(range(opts.nb_samples * 5)):
     # obs, reward, terminated, truncated, info = env.step(random.randint(0, env.action_space.n-1))
     if opts.dqn:
         action = dqn_agent.draw_action(env.dqn_obs)
     else:
-        action = random.randint(0, env.nb_actions-1)
+        action = random.randint(0, env.nb_actions - 1)
     obs, reward, terminated, truncated, info = env.step(action)
     ram = env.get_ram()
-    if random.random() < 1/5:  # every 5 frames
+    if random.random() < 1 / 5:  # every 5 frames
         save = True
         if opts.presence:
             for objstr in opts.tracked_objects:
                 tracked_objects_infos[f"{objstr}.is_present"].append(
-                    str(env.objects).count(f"{objstr} at"))
+                    str(env.objects).count(f"{objstr} at")
+                )
             ram_saves.append(deepcopy(_convert(ram)))
             continue
         for objstr in opts.tracked_objects:
@@ -132,7 +172,8 @@ for i in tqdm(range(opts.nb_samples*5)):
             if objname in opts.tracked_objects:
                 for prop in opts.tracked_properties:
                     tracked_objects_infos[f"{objname}.{prop}"].append(
-                        obj.__getattribute__(prop))
+                        obj.__getattribute__(prop)
+                    )
         ram_saves.append(deepcopy(_convert(ram)))
     if terminated or truncated:
         observation, info = env.reset()
@@ -146,8 +187,11 @@ env.close()
 ipdb.set_trace()
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(
-    128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 
 tracked_objects_infos.update(from_rams)
 df = pd.DataFrame(tracked_objects_infos)
@@ -158,12 +202,13 @@ corr = df.corr(method=opts.method)
 # Reduce the correlation matrix
 # subset = tracked_objects_infos
 # [f"{obj}_x" for obj in opts.tracked_objects] + [f"{obj}_y" for obj in opts.tracked_objects]
-print("-"*20)
+print("-" * 20)
 for el, onlynans in corr.isna().all(axis=1).items():
     if onlynans:
         print(
-            f"Only NaNs found for {el} in the correlation matrix, most probably fix attribute.")
-print("-"*20)
+            f"Only NaNs found for {el} in the correlation matrix, most probably fix attribute."
+        )
+print("-" * 20)
 # Use submatrice
 corr = corr[subset].T
 corr.drop(subset, axis=1, inplace=True)
@@ -174,15 +219,15 @@ if opts.top_n:
     to_keep = []
     for index, row in corr.iterrows():
         au_corr = row.to_frame().abs().unstack().sort_values(ascending=False)
-        au_corr = au_corr[0:opts.top_n].dropna()
-        to_keep.extend([key[1]
-                       for key in au_corr.keys() if key[1] not in to_keep])
+        au_corr = au_corr[0 : opts.top_n].dropna()
+        to_keep.extend([key[1] for key in au_corr.keys() if key[1] not in to_keep])
     corr = corr[to_keep]
 
 
 # if opts.method == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True,
-                 cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -192,12 +237,12 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(opts.game)
 plt.show()
 
 
-print("-"*20)
+print("-" * 20)
 print("Finding relashionshinps using RANSAC regression")
 corrT = corr.T
 for el in corrT:
@@ -207,11 +252,11 @@ for el in corrT:
         # idx = corrT[el].abs()
         if maxval >= 0.6:
             x, y = df[keys[idx]], df[el]
-            xys = pd.DataFrame({'x': x, 'y': y})
+            xys = pd.DataFrame({"x": x, "y": y})
             # a, b = np.polyfit(x, y, deg=1)
             a, b = ransac_regression(x, y)
             for (xp, yp), sp in xys.value_counts(normalize=True).items():
-                plt.scatter(xp, yp, marker="x", color="b", s=500*sp)
+                plt.scatter(xp, yp, marker="x", color="b", s=500 * sp)
             if b >= 0:
                 formulae = f"{el} = {a:.2f} * ram_state[{keys[idx]}] + {b:.2f} "
             else:

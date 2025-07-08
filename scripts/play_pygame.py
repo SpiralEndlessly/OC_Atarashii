@@ -3,9 +3,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import pygame
-from ocatari.core import OCAtari, UPSCALE_FACTOR
+from ocatarashii.core import OCAtari, UPSCALE_FACTOR
 from gymnasium.error import NameNotFound
 import pickle
+
 """
 This script can be used to identify any RAM positions that
 influence the color of a specific pixel. This can be used to
@@ -14,14 +15,15 @@ identify the values that belong to a GameObject.
 
 
 import pygame
-from ocatari.core import OCAtari, DEVICE, EasyDonkey
+from ocatarashii.core import OCAtari, DEVICE, EasyDonkey
 import numpy as np
 import torch
 import cv2
 import random
 
 
-def get_bin(x): return format(x, 'b').zfill(8)
+def get_bin(x):
+    return format(x, "b").zfill(8)
 
 
 RAM_RENDER_WIDTH = 1000
@@ -37,8 +39,14 @@ class Renderer:
 
     def __init__(self, env_name: str):
         try:
-            self.env = OCAtari(env_name, mode="ram", hud=True, render_mode="rgb_array",
-                               render_oc_overlay=True, frameskip=1)
+            self.env = OCAtari(
+                env_name,
+                mode="ram",
+                hud=True,
+                render_mode="rgb_array",
+                render_oc_overlay=True,
+                frameskip=1,
+            )
         except NameNotFound:
             self.env = gym.make(env_name, render_mode="rgb_array", frameskip=1)
         self.env.reset(seed=42)[0]
@@ -122,16 +130,18 @@ class Renderer:
 
                 elif event.key == pygame.K_BACKSPACE:  # remove character
                     if self.active_cell_idx is not None:
-                        self.current_active_cell_input = self.current_active_cell_input[:-1]
+                        self.current_active_cell_input = self.current_active_cell_input[
+                            :-1
+                        ]
 
                 elif event.key == pygame.K_RETURN:
                     if self.active_cell_idx is not None:
                         if len(self.current_active_cell_input) > 0:
-                            new_cell_value = int(
-                                self.current_active_cell_input)
+                            new_cell_value = int(self.current_active_cell_input)
                             if new_cell_value < 256:
                                 self._set_ram_value_at(
-                                    self.active_cell_idx, new_cell_value)
+                                    self.active_cell_idx, new_cell_value
+                                )
                         self._unselect_active_cell()
 
             elif event.type == pygame.KEYUP:  # keyboard key released

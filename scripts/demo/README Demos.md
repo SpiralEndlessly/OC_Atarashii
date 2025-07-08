@@ -13,9 +13,9 @@ import random
 import matplotlib.pyplot as plt
 sys.path.insert(0, '../../') # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.utils import load_agent, parser
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.utils import load_agent, parser
 
 game_name = "< insert game here >"
 MODE = "vision"

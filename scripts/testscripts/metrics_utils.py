@@ -16,10 +16,12 @@ MIN_DIST_DETECTION = 5
 
 def format_values(dictionary):
     keys, values = dictionary.keys(), dictionary.values()
-    return {key: round(val, 1) for key, val in zip(keys, (np.array(list(values)) * 100))}
+    return {
+        key: round(val, 1) for key, val in zip(keys, (np.array(list(values)) * 100))
+    }
 
 
-class DetectionScores():
+class DetectionScores:
     """
     Keeps track of true positives, false positive and false negative of the detected objects.
     Allow to fast compute precision, recall, and f1 scores.
@@ -31,9 +33,7 @@ class DetectionScores():
         self.false_neg = {}
 
     def update(self, det_dict):
-        """
-
-        """
+        """ """
         for cat, (TP, FP, FN) in det_dict.items():
             if not cat in self.true_pos:
                 self.true_pos[cat] = TP
@@ -49,14 +49,22 @@ class DetectionScores():
         """
         The per cartegory dictionary of the precision
         """
-        return {cat: self.true_pos[cat]/(self.true_pos[cat]+self.false_pos[cat]) for cat in self.true_pos if self.true_pos[cat]+self.false_pos[cat]}
+        return {
+            cat: self.true_pos[cat] / (self.true_pos[cat] + self.false_pos[cat])
+            for cat in self.true_pos
+            if self.true_pos[cat] + self.false_pos[cat]
+        }
 
     @property
     def cat_recalls(self):
         """
         The per cartegory dictionary of the recall
         """
-        return {cat: self.true_pos[cat]/(self.true_pos[cat]+self.false_neg[cat]) for cat in self.true_pos if self.true_pos[cat]+self.false_neg[cat]}
+        return {
+            cat: self.true_pos[cat] / (self.true_pos[cat] + self.false_neg[cat])
+            for cat in self.true_pos
+            if self.true_pos[cat] + self.false_neg[cat]
+        }
 
     @property
     def cat_f_scores(self):
@@ -70,8 +78,7 @@ class DetectionScores():
                 if prec[cat] == 0 and rec[cat] == 0:
                     f_scores[cat] = 0
                 else:
-                    f_scores[cat] = 2 * prec[cat] * \
-                        rec[cat] / (prec[cat] + rec[cat])
+                    f_scores[cat] = 2 * prec[cat] * rec[cat] / (prec[cat] + rec[cat])
             except KeyError:
                 f_scores[cat] = 0
         return f_scores
@@ -81,14 +88,18 @@ class DetectionScores():
         """
         The mean precision on all objects
         """
-        return sum(self.true_pos.values())/(sum(self.true_pos.values()) + sum(self.false_pos.values()))
+        return sum(self.true_pos.values()) / (
+            sum(self.true_pos.values()) + sum(self.false_pos.values())
+        )
 
     @property
     def mean_recall(self):
         """
         The mean recall on all objects
         """
-        return sum(self.true_pos.values())/(sum(self.true_pos.values()) + sum(self.false_neg.values()))
+        return sum(self.true_pos.values()) / (
+            sum(self.true_pos.values()) + sum(self.false_neg.values())
+        )
 
     @property
     def mean_f_score(self):
@@ -106,8 +117,12 @@ class DetectionScores():
         """
         The mean precision, recall and F-score on all objects.
         """
-        return {"precision": self.mean_precision, "recall": self.mean_recall, "f-score": self.mean_f_score,
-                "iou": self.iou}
+        return {
+            "precision": self.mean_precision,
+            "recall": self.mean_recall,
+            "f-score": self.mean_f_score,
+            "iou": self.iou,
+        }
 
 
 def print_all_stats(all_stats):
@@ -115,37 +130,37 @@ def print_all_stats(all_stats):
     Nicely prints the stats in the terminal.
     """
     linelength = 39
-    print("Mean IOUs: ", round(all_stats['mean_ious'], 2))
-    print("-"*linelength)
+    print("Mean IOUs: ", round(all_stats["mean_ious"], 2))
+    print("-" * linelength)
     print("\nPer class IOU: ")
-    for objname, res in all_stats['per_class_ious'].items():
+    for objname, res in all_stats["per_class_ious"].items():
         if res < 0.6:
-            print(colored(f"\t| {objname}: {res:.2f}", 'red'))
+            print(colored(f"\t| {objname}: {res:.2f}", "red"))
         elif res < 0.9:
-            print(colored(f"\t| {objname}: {res:.2f}", 'yellow'))
+            print(colored(f"\t| {objname}: {res:.2f}", "yellow"))
         else:
-            print(colored(f"\t| {objname}: {res:.2f}", 'green'))
-    if all_stats['only_in_ram']:
-        print("-"*linelength)
+            print(colored(f"\t| {objname}: {res:.2f}", "green"))
+    if all_stats["only_in_ram"]:
+        print("-" * linelength)
         print("Objects found only in ram version: ")
-        for objname, res in all_stats['only_in_ram'].items():
+        for objname, res in all_stats["only_in_ram"].items():
             if eval(res) < 0.6:
-                print(colored(f"\t| {objname}: {res}", 'red'))
+                print(colored(f"\t| {objname}: {res}", "red"))
             elif eval(res) < 0.9:
-                print(colored(f"\t| {objname}: {res}", 'yellow'))
+                print(colored(f"\t| {objname}: {res}", "yellow"))
             else:
-                print(colored(f"\t| {objname}: {res}", 'green'))
-    if all_stats['only_in_vision']:
-        print("-"*linelength)
+                print(colored(f"\t| {objname}: {res}", "green"))
+    if all_stats["only_in_vision"]:
+        print("-" * linelength)
         print("Objects found only in vision version: ")
-        for objname, res in all_stats['only_in_vision'].items():
+        for objname, res in all_stats["only_in_vision"].items():
             if eval(res) < 0.6:
-                print(colored(f"\t| {objname}: {res}", 'red'))
+                print(colored(f"\t| {objname}: {res}", "red"))
             elif eval(res) < 0.9:
-                print(colored(f"\t| {objname}: {res}", 'yellow'))
+                print(colored(f"\t| {objname}: {res}", "yellow"))
             else:
-                print(colored(f"\t| {objname}: {res}", 'green'))
-    print("-"*linelength)
+                print(colored(f"\t| {objname}: {res}", "green"))
+    print("-" * linelength)
 
 
 def get_iou(obj1, obj2):
@@ -153,15 +168,15 @@ def get_iou(obj1, obj2):
     Computes the intersection over union between two GameObjects.
 
     :param obj1: The bouding box of the detected object in (x, y, w, h) format
-    :type obj1: ocatari.ram.game_objects.GameObject or ocatari.vision.game_objects.GameObject
+    :type obj1: ocatarashii.ram.game_objects.GameObject or ocatarashii.vision.game_objects.GameObject
     :param obj2: The ground truth bouding box
-    :type obj2: ocatari.ram.game_objects.GameObject or ocatari.vision.game_objects.GameObject
+    :type obj2: ocatarashii.ram.game_objects.GameObject or ocatarashii.vision.game_objects.GameObject
     """
     # determine the (x, y)-coordinates of the intersection rectangle
     xA = max(obj1.x, obj2.x)
     yA = max(obj1.y, obj2.y)
-    xB = min(obj1.x+obj1.w, obj2.x+obj2.w)
-    yB = min(obj1.y+obj1.h, obj2.y+obj2.h)
+    xB = min(obj1.x + obj1.w, obj2.x + obj2.w)
+    yB = min(obj1.y + obj1.h, obj2.y + obj2.h)
     # compute the area of intersection rectangle
     interArea = max(0, xB - xA) * max(0, yB - yA)
     # compute the area of both the prediction and ground-truth
@@ -182,18 +197,20 @@ def _make_class_lists(ram_list, vision_list):
     category and then the vision objs of this category.
 
     :param ram_list: The list of objects detected by the RAM extraction method
-    :type ram_list: list of ocatari.ram.game_objects.GameObject
+    :type ram_list: list of ocatarashii.ram.game_objects.GameObject
     :param ram_list: The list of objects detected by the RAM extraction method
-    :type ram_list: list of ocatari.vision.game_objects.GameObject
+    :type ram_list: list of ocatarashii.vision.game_objects.GameObject
 
     :return: A dictionary containing the per class metrics.
     :rtype: dict
     """
-    categories = set([obj.category for obj in ram_list+vision_list])
+    categories = set([obj.category for obj in ram_list + vision_list])
     cat_lists = {}
     for cat in categories:
-        cat_lists[cat] = ([obj.center for obj in ram_list if obj.category == cat],
-                          [obj.center for obj in vision_list if obj.category == cat])
+        cat_lists[cat] = (
+            [obj.center for obj in ram_list if obj.category == cat],
+            [obj.center for obj in vision_list if obj.category == cat],
+        )
     return cat_lists
 
 
@@ -203,9 +220,9 @@ def detection_stats(ram_list, vision_list):
     These metrics are computed based on MIN_DIST_DETECTION (default =5).
 
     :param ram_list: The list of objects detected by the RAM extraction method
-    :type ram_list: list of ocatari.ram.game_objects.GameObject
+    :type ram_list: list of ocatarashii.ram.game_objects.GameObject
     :param ram_list: The list of objects detected by the RAM extraction method
-    :type ram_list: list of ocatari.vision.game_objects.GameObject
+    :type ram_list: list of ocatarashii.vision.game_objects.GameObject
 
     :return: A dictionary containing the per class metrics.
     :rtype: dict
@@ -247,9 +264,9 @@ def get_all_metrics(ram_list, vision_list):
     two lists of GameObjects (from the RAM extraction and from the vision extraction methods).
 
     :param ram_list: The list of objects detected by the RAM extraction method
-    :type ram_list: list of ocatari.ram.game_objects.GameObject
+    :type ram_list: list of ocatarashii.ram.game_objects.GameObject
     :param ram_list: The list of objects detected by the RAM extraction method
-    :type ram_list: list of ocatari.vision.game_objects.GameObject
+    :type ram_list: list of ocatarashii.vision.game_objects.GameObject
 
     :return: A dictionary containing the per class metrics.
     :rtype: dict
@@ -261,6 +278,7 @@ def get_all_metrics(ram_list, vision_list):
     dets = detection_stats(ram_list, vision_list)
     if abs(len(vision_list) - len(ram_list)) > 10 and USE_IPDB:
         import ipdb
+
         ipdb.set_trace()
     for vobj in vision_list:
         vobj._is_in_ram = False
@@ -287,8 +305,12 @@ def get_all_metrics(ram_list, vision_list):
     for vobj in vision_list:
         if not vobj._is_in_ram:
             only_in_vision.append(str(vobj))
-    return {"mean_iou": np.mean(ious), "per_class_ious": per_class_ious,
-            "only_in_ram": only_in_ram, "only_in_vision": only_in_vision,
-            "objs_in_ram": [str(o) for o in ram_list],
-            "objs_in_vision": [str(o) for o in vision_list],
-            "dets": dets}
+    return {
+        "mean_iou": np.mean(ious),
+        "per_class_ious": per_class_ious,
+        "only_in_ram": only_in_ram,
+        "only_in_vision": only_in_vision,
+        "objs_in_ram": [str(o) for o in ram_list],
+        "objs_in_vision": [str(o) for o in vision_list],
+        "dets": dets,
+    }

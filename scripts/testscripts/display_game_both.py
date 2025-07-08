@@ -1,38 +1,44 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
 import matplotlib.pyplot as plt
 from os import path
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.vision.spaceinvaders import objects_colors
-from ocatari.vision.pong import objects_colors
-from ocatari.utils import load_agent, parser, make_deterministic
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.vision.spaceinvaders import objects_colors
+from ocatarashii.vision.pong import objects_colors
+from ocatarashii.utils import load_agent, parser, make_deterministic
 from copy import deepcopy
 from PIL import Image
 import cv2
 import pickle
 
 
-parser.add_argument("-g", "--game", type=str, required=True,
-                    help="game to evaluate (e.g. 'Pong')")
-parser.add_argument("-i", "--interval", type=int, default=10,
-                    help="The frame interval (default 10)")
-parser.add_argument("-s", "--start", type=int, default=0,
-                    help="The frame to start from")
+parser.add_argument(
+    "-g", "--game", type=str, required=True, help="game to evaluate (e.g. 'Pong')"
+)
+parser.add_argument(
+    "-i", "--interval", type=int, default=10, help="The frame interval (default 10)"
+)
+parser.add_argument(
+    "-s", "--start", type=int, default=0, help="The frame to start from"
+)
 parser.add_argument("-hud", "--hud", action="store_true", help="Detect HUD")
 parser.add_argument("-dqn", "--dqn", action="store_true", help="Use DQN agent")
-parser.add_argument("-snap", "--snapshot", type=str, default="",
-                    help="A path to a state snapshot")
+parser.add_argument(
+    "-snap", "--snapshot", type=str, default="", help="A path to a state snapshot"
+)
 
 
 opts = parser.parse_args()
 
 
-env = OCAtari(opts.game+"Deterministic", mode="both",
-              render_mode='rgb_array', hud=opts.hud)
+env = OCAtari(
+    opts.game + "Deterministic", mode="both", render_mode="rgb_array", hud=opts.hud
+)
 
 observation, info = env.reset()
 if opts.snapshot:
@@ -54,13 +60,15 @@ for i in range(100000):
         if opts.dqn:
             action = dqn_agent.draw_action(env.dqn_obs)
         else:
-            action = random.randint(0, env.nb_actions-1)
+            action = random.randint(0, env.nb_actions - 1)
         obs, reward, terminated, truncated, info = env.step(action)
         obs2 = deepcopy(obs)
         if i >= opts.start:
             # for robj in env.objects:
             #     print(robj, robj.closest_object(env.objects_v))
-            for obs, objects_list, title, ax in zip([obs, obs2], [env.objects, env.objects_v], ["ram", "vision"], axes):
+            for obs, objects_list, title, ax in zip(
+                [obs, obs2], [env.objects, env.objects_v], ["ram", "vision"], axes
+            ):
                 toprint = sorted(objects_list, key=lambda o: str(o))
                 # print([o for o in toprint if "Fuel" in str(o)])
                 print(toprint)
@@ -91,9 +99,12 @@ for i in range(100000):
     #     print(e)
     else:
         import ipdb
+
         ipdb.set_trace()
         fig, axes = plt.subplots(1, 2)
-        for obs, objects_list, title, ax in zip([obs, obs2], [env.objects, env.objects_v], ["ram", "vision"], axes):
+        for obs, objects_list, title, ax in zip(
+            [obs, obs2], [env.objects, env.objects_v], ["ram", "vision"], axes
+        ):
             toprint = sorted(objects_list, key=lambda o: str(o))
             # print([o for o in toprint if "Fuel" in str(o)])
             print(toprint)

@@ -2,6 +2,7 @@
 Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
+
 import random
 import matplotlib.pyplot as plt
 from copy import deepcopy
@@ -11,16 +12,21 @@ import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
 import sys
+
 # import pathlib
-sys.path.insert(0, '../../ocatari') # noqa
+sys.path.insert(0, "../../ocatarashii")  # noqa
 from core import OCAtari
 
 
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=50, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=50,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
 
@@ -67,7 +73,11 @@ for i in tqdm(range(200)):
 env.close()
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
 df["ball_height"] = df["ball_y"] - df["ball_shadow_y"]
@@ -79,7 +89,12 @@ METHOD = "spearman"
 # METHOD = "pearson"
 corr = df.corr(method=METHOD)
 # Reduce the correlation matrix
-subset = [f"{obj}_x" for obj in object_list] + [f"{obj}_y" for obj in object_list] + ["ball_height"] + ["ball_offset_x"]
+subset = (
+    [f"{obj}_x" for obj in object_list]
+    + [f"{obj}_y" for obj in object_list]
+    + ["ball_height"]
+    + ["ball_offset_x"]
+)
 
 # Use submatrice
 corr = corr[subset].T
@@ -89,7 +104,9 @@ if DROP_LOW:
     corr = corr[corr.columns[[corr.abs().max() > MIN_CORRELATION]]]
 
 # if METHOD == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -99,7 +116,7 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 corrT = corr.T

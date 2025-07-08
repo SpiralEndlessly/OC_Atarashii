@@ -3,7 +3,7 @@ Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -17,16 +17,20 @@ from sklearn.linear_model import RANSACRegressor, LinearRegression
 from time import sleep
 
 
-sys.path.insert(0, '../ocatari')  # noqa
-from ocatari.core import OCAtari
-from ocatari.utils import load_agent
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
+from ocatarashii.utils import load_agent
 
 
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=50, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=50,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
 
@@ -59,7 +63,7 @@ ram_saves = []
 actions = [3] * 40 + [4] * 40 + [5] * 50 + [6] * 40
 
 
-class Dummy():
+class Dummy:
     def __init__(self) -> None:
         pass
 
@@ -75,7 +79,7 @@ j = 0
 for i in tqdm(range(NB_SAMPLES)):
     # obs, reward, terminated, truncated, info = env.step(random.randint(0, env.action_space.n-1))
     # action = agent.draw_action(env.dqn_obs)
-    action = actions[i%len(actions)]
+    action = actions[i % len(actions)]
     # prob = random.random()
     # if prob > 0.9:
     #     action = 2 # UP
@@ -100,7 +104,7 @@ for i in tqdm(range(NB_SAMPLES)):
         for obj_name in object_list:  # avoid state without the tracked objects
             if str(env.objects).count(f"{obj_name} at") != 1:
                 SKIP = True
-        if SKIP:# or env.objects[-2].y < env.objects[-1].y:
+        if SKIP:  # or env.objects[-2].y < env.objects[-1].y:
             continue
         for obj in env.objects:
             objname = obj.category
@@ -116,9 +120,15 @@ env.close()
 if len(ram_saves) == 0:
     print("No data point was taken")
 
-import ipdb; ipdb.set_trace()
+import ipdb
+
+ipdb.set_trace()
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
 
@@ -148,7 +158,9 @@ if DROP_LOW:
     corr = corr.loc[:, (corr.abs() > MIN_CORRELATION).any()]
 
 # if METHOD == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -158,7 +170,7 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 
@@ -172,7 +184,7 @@ for el in corrT:
     keys = corrT[el].keys()
     for idx in range(len(keys)):
         maxval = corrT[el].abs()[keys[idx]]
-        #idx = corrT[el].abs()
+        # idx = corrT[el].abs()
         if maxval > 0.8:
             x, y = df[keys[idx]], df[el]
             # a, b = np.polyfit(x, y, deg=1)

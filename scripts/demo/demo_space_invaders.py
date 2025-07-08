@@ -1,16 +1,16 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import random
 import sys
 import matplotlib.pyplot as plt
 import ipdb
-sys.path.insert(0, '../../')  # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.ram.demonattack import ProjectileHostile
-from ocatari.utils import load_agent, parser
+sys.path.insert(0, "../../")  # noqa
 
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.ram.demonattack import ProjectileHostile
+from ocatarashii.utils import load_agent, parser
 
 
 game_name = "SpaceInvaders-v4"
@@ -18,7 +18,7 @@ MODE = "vision"
 # MODE = "raw"
 MODE = "revised"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 prevRam = [_ for _ in range(256)]
 checked = False
@@ -38,8 +38,10 @@ for i in range(10000000):
     # env.step(env.action_space.sample())
     # env._env.unwrapped.ale.setRAM(73, 2)
     # if i > 200 and i % 10 == 0:  # checked or i % 1 == 0 and i>38 and prevRam[73] != ram[73]:
-    if i > 100 and i % 10 == 0:  # checked or i % 1 == 0 and i>38 and prevRam[73] != ram[73]:
-    # if i > 30 and i % 2 == 0:  # checked or i % 1 == 0 and i>38 and prevRam[73] != ram[73]:
+    if (
+        i > 100 and i % 10 == 0
+    ):  # checked or i % 1 == 0 and i>38 and prevRam[73] != ram[73]:
+        # if i > 30 and i % 2 == 0:  # checked or i % 1 == 0 and i>38 and prevRam[73] != ram[73]:
         checked = True
         print("i =", i)
         print(env.objects)

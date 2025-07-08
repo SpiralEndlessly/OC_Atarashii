@@ -18,7 +18,7 @@ It is recommended to provide a snapshot where the desired object is already pres
 
 # TODO: No unique mapping, yet, for most values -> Further filtering and validationof ram pairs required.
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -31,32 +31,62 @@ import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
 from os import path
 import pathlib
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
-from ocatari.core import OCAtari
-from ocatari.utils import parser, load_agent, make_deterministic
+from ocatarashii.core import OCAtari
+from ocatarashii.utils import parser, load_agent, make_deterministic
 import pickle
 from time import sleep
 
 
-parser.add_argument("-g", "--game", type=str, required=True,
-                    help="game to evaluate (e.g. 'Pong')")
-parser.add_argument("-to", "--tracked_objects", type=str, default=["Player"], nargs='+',
-                    help="A list of objects to track")
-parser.add_argument("-tp", "--tracked_properties", type=str, default=['x', 'y'], nargs='+',
-                    help="A list of properties to track for each object")
-parser.add_argument("-ns", "--nb_samples", type=int, default=1000,
-                    help="The number of samples to use.")
+parser.add_argument(
+    "-g", "--game", type=str, required=True, help="game to evaluate (e.g. 'Pong')"
+)
+parser.add_argument(
+    "-to",
+    "--tracked_objects",
+    type=str,
+    default=["Player"],
+    nargs="+",
+    help="A list of objects to track",
+)
+parser.add_argument(
+    "-tp",
+    "--tracked_properties",
+    type=str,
+    default=["x", "y"],
+    nargs="+",
+    help="A list of properties to track for each object",
+)
+parser.add_argument(
+    "-ns", "--nb_samples", type=int, default=1000, help="The number of samples to use."
+)
 parser.add_argument("-dqn", "--dqn", action="store_true", help="Use DQN agent")
-parser.add_argument("-s", "--seed", default=0,
-                    help="Seed to make everything deterministic")
-parser.add_argument("-r", "--render", action="store_true",
-                    help="If provided, renders")
-parser.add_argument("-m", "--method", type=str, default="pearson", choices={"pearson", "spearman", "kendall"},
-                    help="The method to use for computing the correlation")
-parser.add_argument("-snap", "--snapshot", type=str, default=None,
-                    help="Path to an emulator state snapshot to start from.")
-parser.add_argument("-q", "--quantile", type=float,
-                    help="The quantile for filtering RAM pairs based on correlation value")
+parser.add_argument(
+    "-s", "--seed", default=0, help="Seed to make everything deterministic"
+)
+parser.add_argument("-r", "--render", action="store_true", help="If provided, renders")
+parser.add_argument(
+    "-m",
+    "--method",
+    type=str,
+    default="pearson",
+    choices={"pearson", "spearman", "kendall"},
+    help="The method to use for computing the correlation",
+)
+parser.add_argument(
+    "-snap",
+    "--snapshot",
+    type=str,
+    default=None,
+    help="Path to an emulator state snapshot to start from.",
+)
+parser.add_argument(
+    "-q",
+    "--quantile",
+    type=float,
+    help="The quantile for filtering RAM pairs based on correlation value",
+)
 
 opts = parser.parse_args()
 
@@ -78,7 +108,7 @@ if opts.snapshot:
     env._env.env.env.ale.restoreState(snapshot)
 
 
-def viz_correlations(corr, n_bins='auto'):
+def viz_correlations(corr, n_bins="auto"):
     """Visualizes the correlation matrix of all ram states and a histogram over pairwise correlation values. The diagonal ones of the
     correlation matrix are ignored for the histogram."""
 
@@ -90,31 +120,36 @@ def viz_correlations(corr, n_bins='auto'):
 
     fig, axs = plt.subplots(1, 2)
     img = axs[0].matshow(corr)
-    plt.colorbar(mappable=img, orientation='vertical', label='correlation')
-    axs[0].set_title('Correlation Matrix of RAM Positions')
+    plt.colorbar(mappable=img, orientation="vertical", label="correlation")
+    axs[0].set_title("Correlation Matrix of RAM Positions")
     axs[1].hist(corr_values, n_bins, density=True)
-    axs[1].set_title(
-        'Histogram over correlation values (corrected for diagonal ones)')
+    axs[1].set_title("Histogram over correlation values (corrected for diagonal ones)")
     plt.show()
 
 
 def find_corr_pairs(corr, quantile):
-    """Reduce the set of test ram-pairs by selecting those above a specified correlation threshold (given as a quantile). """
+    """Reduce the set of test ram-pairs by selecting those above a specified correlation threshold (given as a quantile)."""
 
-    top_perc = np.round((1 - quantile)*100)
+    top_perc = np.round((1 - quantile) * 100)
     print(f"\nFiltering RAM Pairs with top {top_perc} % correlation...\n")
-    high_corrs = list()     # list of tuples for candidate ram-pairs
-    positions = list()      # list of ram positions included in the candidate pairs
+    high_corrs = list()  # list of tuples for candidate ram-pairs
+    positions = list()  # list of ram positions included in the candidate pairs
 
     # Mask out duplicate lower triangle of correlation matrix
     corr_upper_tri = corr.mask(np.tril(np.ones(corr.shape)).astype(bool))
     masked_array = corr_upper_tri.to_numpy()
     # Compute the threshold (quantile) value
     thresh = np.nanquantile(masked_array, opts.quantile)
-    thresh_mask = corr_upper_tri.where((corr_upper_tri.abs() > thresh) & (
-        corr_upper_tri.abs() < 1))  # mask out all values below quantile
+    thresh_mask = corr_upper_tri.where(
+        (corr_upper_tri.abs() > thresh) & (corr_upper_tri.abs() < 1)
+    )  # mask out all values below quantile
 
-    for index, row in thresh_mask.iterrows():   # iterate over rows of mask matrix to generate ram-pair candidates
+    for (
+        index,
+        row,
+    ) in (
+        thresh_mask.iterrows()
+    ):  # iterate over rows of mask matrix to generate ram-pair candidates
 
         if row.isna().all(axis=None):
             continue
@@ -123,19 +158,21 @@ def find_corr_pairs(corr, quantile):
         # labels := second element(s) of ram pair
         labels = row.dropna().index.tolist()
         positions.extend(labels)
-        ram_pairs = [(int(index), int(label))
-                     for label in labels]      # crate tuple of ram positions
+        ram_pairs = [
+            (int(index), int(label)) for label in labels
+        ]  # crate tuple of ram positions
         high_corrs.extend(ram_pairs)
         print(f"{index} -> {labels}")
 
     # set of ram positions that are included in the found pairs
     positions = np.unique(np.array(positions, dtype=int))
     print(
-        f"\nFound {len(high_corrs)} RAM pairs above the specified correlation threshold (ones excluded)")
+        f"\nFound {len(high_corrs)} RAM pairs above the specified correlation threshold (ones excluded)"
+    )
     # plot the masked and thresholded correlation matrix
     fig, ax = plt.subplots()
     img = ax.matshow(thresh_mask)
-    plt.colorbar(mappable=img, orientation='vertical', label='correlation')
+    plt.colorbar(mappable=img, orientation="vertical", label="correlation")
     ax.set_title(f"Top {top_perc} % correlated RAM Positions (ones excluded)")
     plt.show()
 
@@ -143,29 +180,31 @@ def find_corr_pairs(corr, quantile):
 
 
 def compare_prop_stats(observed, generated):
-    """ Used to check, whether the found interactions are close to the ground-truth actions.
+    """Used to check, whether the found interactions are close to the ground-truth actions.
     Compares a few simple statistics of the tracked property from the acquisition run (random/agent-based gameplay) and
     the generated property values from the analysis run (probing ram pairs and ram values).
     Compared are the number of unique values, the range of values and the step size."""
 
     target = f"{opts.tracked_objects[0]} - {opts.tracked_properties[0]}"
-    source_lines = ('Observed', 'Generated')
+    source_lines = ("Observed", "Generated")
 
     for prop_saves, header_prefix in zip((observed, generated), source_lines):
         prop_saves = np.array(prop_saves)
         unique_prop_vals = np.unique(prop_saves)
         prop_bounds = tuple([min(prop_saves), max(prop_saves)])
-        if header_prefix == 'Generated':
+        if header_prefix == "Generated":
             d_prop = np.abs(np.diff(unique_prop_vals))
         else:
             d_prop = np.abs(np.diff(prop_saves))
         uniques, indices, counts = np.unique(
-            d_prop, return_index=True, return_counts=True)
+            d_prop, return_index=True, return_counts=True
+        )
         prop_step_size = uniques[np.argmax(counts)]
-        print('-------------')
+        print("-------------")
         print(f"{header_prefix} stats for {target}:\n")
         print(
-            f"Number of unique values: {unique_prop_vals.size}\nRange: {prop_bounds}\n Main Step Size: {prop_step_size}\n")
+            f"Number of unique values: {unique_prop_vals.size}\nRange: {prop_bounds}\n Main Step Size: {prop_step_size}\n"
+        )
 
     return
 
@@ -294,7 +333,8 @@ class InteractionTracker:
             if self.cat == obj.category:
                 prop_value = obj.__getattribute__(self.prop)
                 print(
-                    f"Base value of {opts.tracked_objects[0]}-{opts.tracked_properties[0]}: {prop_value}")
+                    f"Base value of {opts.tracked_objects[0]}-{opts.tracked_properties[0]}: {prop_value}"
+                )
                 return prop_value
             else:
                 continue
@@ -302,7 +342,7 @@ class InteractionTracker:
     def _generate_test_values(self):
         """Empirically generates a set of ram values for each ram position included in the test-candidates."""
 
-        print('\nGenerating test-value sets for RAM positions...\n')
+        print("\nGenerating test-value sets for RAM positions...\n")
 
         for ram_pos in self.positions:
             values = self.ram_data.loc[:, str(ram_pos)].unique()
@@ -325,11 +365,9 @@ class InteractionTracker:
         if nb_diff > self.diff_ceil:
             update_prop = np.nan
         else:
-            current_objects = dict([(obj.category, obj)
-                                   for obj in env.objects])
+            current_objects = dict([(obj.category, obj) for obj in env.objects])
             if self.cat in current_objects.keys():
-                new_prop = current_objects[self.cat].__getattribute__(
-                    self.prop)
+                new_prop = current_objects[self.cat].__getattribute__(self.prop)
                 if (new_prop - self.old_prop) != 0:
                     update_prop = new_prop
                 else:
@@ -366,9 +404,12 @@ class InteractionTracker:
         # print(f"Proposed values to keep: {prop_vals[to_keep]}")
         kept_vals = np.count_nonzero(to_keep)
 
-        if (kept_vals > 10):
+        if kept_vals > 10:
             icandit = InteractionCandidate(
-                ram_pair=test_pair, ram_values=ram_vals_tokeep, prop_values=prop_vals[to_keep])
+                ram_pair=test_pair,
+                ram_values=ram_vals_tokeep,
+                prop_values=prop_vals[to_keep],
+            )
             self.interactions.append(icandit)
         else:
             pass
@@ -405,15 +446,15 @@ class InteractionTracker:
             prop_vals = candidate.get_prop_values()
 
             fig = plt.figure()
-            ax = fig.add_subplot(projection='3d')
+            ax = fig.add_subplot(projection="3d")
             ax.scatter(ram1vals, ram2vals, prop_vals)
 
             ax.set_xlabel(f"RAM {ram1} value")
             ax.set_ylabel(f"RAM {ram2} value")
-            ax.set_zlabel(
-                f"{opts.tracked_objects[0]} {opts.tracked_properties[0]}")
+            ax.set_zlabel(f"{opts.tracked_objects[0]} {opts.tracked_properties[0]}")
             ax.set_title(
-                f"Interactions of  {opts.tracked_objects[0]} {opts.tracked_properties[0]} with ram pair {(ram1, ram2)}")
+                f"Interactions of  {opts.tracked_objects[0]} {opts.tracked_properties[0]} with ram pair {(ram1, ram2)}"
+            )
             plt.show()
 
         return
@@ -432,12 +473,15 @@ class InteractionTracker:
             val1labels, val2labels = candidate.get_ram_values()
             ram_label = candidate.get_ram_pair()
             for i in range(prop_vals.size):
-                label = f"R{ram_label[0]}:{val1labels[i]}| R{ram_label[1]}:{val2labels[i]}"
+                label = (
+                    f"R{ram_label[0]}:{val1labels[i]}| R{ram_label[1]}:{val2labels[i]}"
+                )
                 xlabels.append(label)
         y = np.array(y)
         xlabels = np.array(xlabels)
         uniques, unique_indices, unique_counts = np.unique(
-            y, return_index=True, return_counts=True)
+            y, return_index=True, return_counts=True
+        )
 
         return y, xlabels, uniques, unique_indices, unique_counts
 
@@ -454,10 +498,10 @@ class InteractionTracker:
         unique_y = uniques[unique_counts == 1]
         unique_indices = unique_indices[unique_counts == 1]
         unique_labels = xlabels[unique_indices]
+        print(f"Found {uniques.size} unique values for {opts.tracked_properties[0]}")
         print(
-            f"Found {uniques.size} unique values for {opts.tracked_properties[0]}")
-        print(
-            f"Values for {opts.tracked_properties[0]} with unique mapping: {unique_y.size}")
+            f"Values for {opts.tracked_properties[0]} with unique mapping: {unique_y.size}"
+        )
 
         x = np.arange(xlabels.size)
 
@@ -465,12 +509,10 @@ class InteractionTracker:
 
         fig, ax = plt.subplots()
         ax.scatter(x, y_sorted)
-        ax.set_xticks(ticks=x, labels=labels_sorted,
-                      rotation=-90, fontsize='xx-small')
+        ax.set_xticks(ticks=x, labels=labels_sorted, rotation=-90, fontsize="xx-small")
         ax.set_xlabel("RAM pairs and respective values")
         ax.set_ylabel(obj_and_prop)
-        ax.set_title(
-            f"Summarized pairwise RAM interactions for {obj_and_prop}")
+        ax.set_title(f"Summarized pairwise RAM interactions for {obj_and_prop}")
         plt.subplots_adjust(bottom=0.15)
 
         plt.show()
@@ -503,8 +545,9 @@ class InteractionTracker:
         for val in uniques:
             end_idx = start_idx + unique_counts[uniques == val][0]
             labels_to_add = xlabels_sort[start_idx:end_idx]
-            padded = np.pad(labels_to_add, (0, max_len -
-                            labels_to_add.size), constant_values=0)
+            padded = np.pad(
+                labels_to_add, (0, max_len - labels_to_add.size), constant_values=0
+            )
             report[str(val)] = np.where(padded == 0, np.nan, padded)
             start_idx = end_idx
         report_out = pd.DataFrame(report)
@@ -512,9 +555,10 @@ class InteractionTracker:
         print(f"{report_header}\n{sep_long}\n{report_out}")
 
         save = input("Save current report? [y/n]")
-        if save == 'y':
+        if save == "y":
             save_path = input(
-                "Please enter a full path (with .csv suffix) for saving the report:")
+                "Please enter a full path (with .csv suffix) for saving the report:"
+            )
             report_out.to_csv(save_path)
         else:
             pass
@@ -533,15 +577,15 @@ if opts.dqn:
         dqn_agent = load_agent(opts, env.action_space.n)
     except FileNotFoundError:
         oc_atari_dir = pathlib.Path(__file__).parents[1].resolve()
-        opts.path = str(oc_atari_dir / 'models' / f"{opts.game}" / 'dqn.gz')
+        opts.path = str(oc_atari_dir / "models" / f"{opts.game}" / "dqn.gz")
         dqn_agent = load_agent(opts, env.action_space.n)
 
-ram_saves = []      # ram states
-diff_saves = []     # number of image pixel differences
-obj_extents = []    # surface areas of the tracked object (bbox width x height)
-prop_saves = []     # values of the tracked property
+ram_saves = []  # ram states
+diff_saves = []  # number of image pixel differences
+obj_extents = []  # surface areas of the tracked object (bbox width x height)
+prop_saves = []  # values of the tracked property
 base_obs, _, _, _, _ = env.step(0)
-cat = opts.tracked_objects[0]       # tracked object category
+cat = opts.tracked_objects[0]  # tracked object category
 
 if opts.snapshot:
     snapshot = pickle.load(open(opts.snapshot, "rb"))
@@ -556,7 +600,7 @@ for i in tqdm(range(opts.nb_samples)):
     if opts.dqn:
         action = dqn_agent.draw_action(env.dqn_obs)
     else:
-        action = random.randint(0, env.nb_actions-1)
+        action = random.randint(0, env.nb_actions - 1)
 
     obs, reward, terminated, truncated, info = env.step(action)
 
@@ -600,8 +644,11 @@ img_diff_ceil = max(diff_saves) * (1 + diff_headroom)
 obj_diff_ceil = max(diff_saves) * 2
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(
-    128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 
 df = pd.DataFrame(from_rams)
 # find correlation
@@ -610,23 +657,31 @@ corr = df.corr(method=opts.method)
 # Reduce the correlation matrix
 # subset = tracked_objects_infos
 # [f"{obj}_x" for obj in opts.tracked_objects] + [f"{obj}_y" for obj in opts.tracked_objects]
-print("-"*20)
+print("-" * 20)
 for el, onlynans in corr.isna().all(axis=1).items():
     if onlynans:
         print(
-            f"Only NaNs found for {el} in the correlation matrix, most probably fix attribute.")
-print("-"*20)
+            f"Only NaNs found for {el} in the correlation matrix, most probably fix attribute."
+        )
+print("-" * 20)
 # Use submatrice
 
 viz_correlations(corr)
 ram_pairs, corr_positions = find_corr_pairs(corr, opts.quantile)
 
-tracker = InteractionTracker(env, obj_cat=opts.tracked_objects[0], property=opts.tracked_properties[0],
-                             ram_data=df, high_corrs=ram_pairs, positions=corr_positions)
+tracker = InteractionTracker(
+    env,
+    obj_cat=opts.tracked_objects[0],
+    property=opts.tracked_properties[0],
+    ram_data=df,
+    high_corrs=ram_pairs,
+    positions=corr_positions,
+)
 
 interactions = tracker.test_all_ram_pairs(obj_diff_ceil)
 props_generated = np.concatenate(
-    tuple([candidate.get_prop_values() for candidate in interactions]))
+    tuple([candidate.get_prop_values() for candidate in interactions])
+)
 
 compare_prop_stats(prop_saves, props_generated)
 

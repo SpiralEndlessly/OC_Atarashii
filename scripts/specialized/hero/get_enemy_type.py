@@ -10,18 +10,41 @@ from copy import deepcopy
 
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, '../ocatari')  # noqa
-from ocatari.core import OCAtari
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
+
 # from alive_progress import alive_bar
-from ocatari.utils import parser, make_deterministic
-from ocatari.vision.utils import find_objects
-from ocatari.vision.hero import Lamp
-from ocatari.vision.hero import Platform
+from ocatarashii.utils import parser, make_deterministic
+from ocatarashii.vision.utils import find_objects
+from ocatarashii.vision.hero import Lamp
+from ocatarashii.vision.hero import Platform
 
-number_of_configuration_per_level = [2, 4, 6, 8, 8, 10, 12, 14, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16]
+number_of_configuration_per_level = [
+    2,
+    4,
+    6,
+    8,
+    8,
+    10,
+    12,
+    14,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+]
 
-parser.add_argument("-g", "--game", type=str, required=True,
-                    help="game to evaluate (e.g. 'Pong')")
+parser.add_argument(
+    "-g", "--game", type=str, required=True, help="game to evaluate (e.g. 'Pong')"
+)
 
 opts = parser.parse_args()
 
@@ -33,7 +56,7 @@ random.seed(0)
 
 make_deterministic(0, env)
 
-get_bin = lambda x: format(int(x), 'b').zfill(8)
+get_bin = lambda x: format(int(x), "b").zfill(8)
 
 observation, info = env.reset()
 
@@ -44,7 +67,10 @@ binary_mode = False
 
 def show_ims(obs, level_number, configuration_number):
     plt.imshow(obs)
-    plt.title(f"level set to {level_number} and configuration {configuration_number})", fontsize=20)
+    plt.title(
+        f"level set to {level_number} and configuration {configuration_number})",
+        fontsize=20,
+    )
     plt.show()
 
 
@@ -65,13 +91,23 @@ X_MAX_GAMEZONE = 142
 
 def detect_lamp_and_plateform(obs):
     lamps_and_platforms = []
-    for lamp in find_objects(obs, [142,142,142], miny=Y_MIN_GAMEZONE, maxy=Y_MAX_GAMEZONE,
-                             minx=X_MIN_GAMEZONE):
+    for lamp in find_objects(
+        obs,
+        [142, 142, 142],
+        miny=Y_MIN_GAMEZONE,
+        maxy=Y_MAX_GAMEZONE,
+        minx=X_MIN_GAMEZONE,
+    ):
         lamp = Lamp(*lamp)
         if lamp.h < 10 and lamp.h > 2:
             lamps_and_platforms.append(lamp)
-    for platform in find_objects(obs, [232, 232, 74], miny=Y_MIN_GAMEZONE, maxy=Y_MAX_GAMEZONE,
-                                 minx=X_MIN_GAMEZONE):
+    for platform in find_objects(
+        obs,
+        [232, 232, 74],
+        miny=Y_MIN_GAMEZONE,
+        maxy=Y_MAX_GAMEZONE,
+        minx=X_MIN_GAMEZONE,
+    ):
         platform = Platform(*platform)
         if platform.w > 6:
             lamps_and_platforms.append(platform)
@@ -101,7 +137,7 @@ for level_number in range(0, 20):
         resulting_obs, _, _, _, _ = env.step(0)
 
         for i in range(4):
-            env.set_ram(32+i, 0)
+            env.set_ram(32 + i, 0)
 
         lamps_and_platforms = detect_lamp_and_plateform(resulting_obs)
         print(lamps_and_platforms)
@@ -110,11 +146,17 @@ for level_number in range(0, 20):
             lamp_or_platform = lamps_and_platforms[i]
             if isinstance(lamp_or_platform, Lamp):
                 if lamp_or_platform.y < stage_zone_y[0]:
-                    lamps_first_part_of_stage.append((level_number, configuration_number))
+                    lamps_first_part_of_stage.append(
+                        (level_number, configuration_number)
+                    )
                 elif lamp_or_platform.y < stage_zone_y[1]:
-                    lamps_second_part_of_stage.append((level_number, configuration_number))
+                    lamps_second_part_of_stage.append(
+                        (level_number, configuration_number)
+                    )
                 else:
-                    lamps_third_part_of_stage.append((level_number, configuration_number))
+                    lamps_third_part_of_stage.append(
+                        (level_number, configuration_number)
+                    )
             else:
                 platforms_presence.append((level_number, configuration_number))
 

@@ -1,6 +1,6 @@
 import numpy as np
 import pygame
-from ocatari.core import OCAtari, UPSCALE_FACTOR
+from ocatarashii.core import OCAtari, UPSCALE_FACTOR
 from tqdm import tqdm
 from collections import deque
 from copy import deepcopy
@@ -27,9 +27,17 @@ class Renderer:
     clock: pygame.time.Clock
     env: OCAtari
 
-    def __init__(self, env_name, mode='ram', no_render=[]):
-        self.env = OCAtari(env_name, mode=mode, hud=True, render_mode="rgb_array",
-                           render_oc_overlay=True, frameskip=1, obs_mode="obj", repeat_action_probability=0)
+    def __init__(self, env_name, mode="ram", no_render=[]):
+        self.env = OCAtari(
+            env_name,
+            mode=mode,
+            hud=True,
+            render_mode="rgb_array",
+            render_oc_overlay=True,
+            frameskip=1,
+            obs_mode="obj",
+            repeat_action_probability=0,
+        )
         self.env.reset(seed=42)
         self.current_frame = self.env.render()
         self._init_pygame(self.current_frame)
@@ -40,7 +48,8 @@ class Renderer:
         self.keys2actions = self.env.unwrapped.get_keys_to_action()
 
         self.ram_grid_anchor_left = self.env_render_shape[0] + round(
-            28 * (UPSCALE_FACTOR / 4))
+            28 * (UPSCALE_FACTOR / 4)
+        )
         self.ram_grid_anchor_top = round(28 * (UPSCALE_FACTOR / 4))
 
         self.active_cell_idx = None
@@ -58,13 +67,17 @@ class Renderer:
         pygame.display.set_caption("OCAtari Environment")
         self.env_render_shape = sample_image.shape[:2]
         window_size = (
-            self.env_render_shape[0] + RAM_RENDER_WIDTH, self.env_render_shape[1])
+            self.env_render_shape[0] + RAM_RENDER_WIDTH,
+            self.env_render_shape[1],
+        )
         self.window = pygame.display.set_mode(window_size)
         self.clock = pygame.time.Clock()
         self.ram_cell_id_font = pygame.font.SysFont(
-            'Pixel12x10', round(25 * (UPSCALE_FACTOR / 4)))
+            "Pixel12x10", round(25 * (UPSCALE_FACTOR / 4))
+        )
         self.ram_cell_value_font = pygame.font.SysFont(
-            'Pixel12x10', round(30 * (UPSCALE_FACTOR / 4)))
+            "Pixel12x10", round(30 * (UPSCALE_FACTOR / 4))
+        )
 
     def run(self):
         self.running = True
@@ -73,8 +86,13 @@ class Renderer:
         while self.running:
             self._handle_user_input()
             if not (self.frame_by_frame and not (self.next_frame)) and not self.paused:
-                self.saved_frames.append((deepcopy(self.env.get_ram()), self.env._ale.cloneState(
-                ), self.current_frame))  # ram, state, image (rgb)
+                self.saved_frames.append(
+                    (
+                        deepcopy(self.env.get_ram()),
+                        self.env._ale.cloneState(),
+                        self.current_frame,
+                    )
+                )  # ram, state, image (rgb)
                 action = self._get_action()
                 # self.paddle.step(action.name)
                 action = self.env.get_action_meanings().index(action.name)
@@ -171,15 +189,15 @@ class Renderer:
                                 self.env.set_ram(i, ram_v)
                             for i, value in enumerate(previous[0]):
                                 self._render_ram_cell(i, value)
-                            self.env._ale.restoreState(
-                                previous[1])  # restore state
+                            self.env._ale.restoreState(previous[1])  # restore state
                             self.current_frame = previous[2].copy()
                             self._render_atari()
                             pygame.display.flip()
                             pygame.event.pump()
                         else:
                             print(
-                                "There are no prior frames saved to go back to. Save more using the flag --previous_frames")
+                                "There are no prior frames saved to go back to. Save more using the flag --previous_frames"
+                            )
 
                 if event.key == pygame.K_r:  # 'R': reset
                     self.env.reset()
@@ -219,16 +237,18 @@ class Renderer:
 
                 elif event.key == pygame.K_BACKSPACE:  # remove character
                     if self.active_cell_idx is not None:
-                        self.current_active_cell_input = self.current_active_cell_input[:-1]
+                        self.current_active_cell_input = self.current_active_cell_input[
+                            :-1
+                        ]
 
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     if self.active_cell_idx is not None:
                         if len(self.current_active_cell_input) > 0:
-                            new_cell_value = int(
-                                self.current_active_cell_input)
+                            new_cell_value = int(self.current_active_cell_input)
                             if new_cell_value < 256:
                                 self._set_ram_value_at(
-                                    self.active_cell_idx, new_cell_value)
+                                    self.active_cell_idx, new_cell_value
+                                )
                         self._unselect_active_cell()
 
             elif event.type == pygame.KEYUP:  # keyboard key released
@@ -323,8 +343,7 @@ class Renderer:
                 color = (30, 90, 255)
             else:
                 color = (200, 200, 200)
-            text = self.ram_cell_value_font.render(
-                str(value), True, color, None)
+            text = self.ram_cell_value_font.render(str(value), True, color, None)
             text_rect = text.get_rect()
             text_rect.bottomright = (x + w - 2, y + h - 2)
             self.window.blit(text, text_rect)
@@ -351,10 +370,8 @@ class Renderer:
     def _get_cell_under_mouse(self):
         x, y = self.current_mouse_pos
         if x > self.ram_grid_anchor_left and y > self.ram_grid_anchor_top:
-            col = int((x - self.ram_grid_anchor_left) //
-                      (120 * (UPSCALE_FACTOR / 4)))
-            row = int((y - self.ram_grid_anchor_top) //
-                      (50 * (UPSCALE_FACTOR / 4)))
+            col = int((x - self.ram_grid_anchor_left) // (120 * (UPSCALE_FACTOR / 4)))
+            row = int((y - self.ram_grid_anchor_top) // (50 * (UPSCALE_FACTOR / 4)))
             if col < RAM_N_COLS and row < 16:
                 return row * RAM_N_COLS + col
         return None
@@ -402,26 +419,59 @@ class Renderer:
 if __name__ == "__main__":
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(description='OCAtari remgui.py Argument Setter')
+    parser = ArgumentParser(description="OCAtari remgui.py Argument Setter")
 
-    parser.add_argument('-g', '--game', type=str, default="Pong",
-                        help='Game to be run')
-    parser.add_argument('-hu', '--human', action='store_true',
-                        help='Let user play the game.')
-    parser.add_argument('-sf', '--switch_frame', type=int, default=0,
-                        help='Swicht_modfis are applied to the game after this frame-threshold')
-    parser.add_argument('-p', '--picture', type=int, default=0,
-                        help='Takes a picture after the number of steps provided.')
-    parser.add_argument('-a', '--agent', type=str, default='',
-                        help="Path to the cleanrl trained agent to be loaded.")
-    parser.add_argument('-nr', '--no_render', type=int, default=[],
-                        help='Cells to not render.', nargs='+')
-    parser.add_argument('-nra', '--no_render_all', action='store_true',
-                        help='Not rendering any cell.')
-    parser.add_argument('-m', '--mode', type=str, default='ram', choices=['ram', 'vision'],
-                        help='Extraction mode.')
-    parser.add_argument('-ls', '--load_state', type=str, default=None,
-                        help='Path to the state to be loaded.')
+    parser.add_argument("-g", "--game", type=str, default="Pong", help="Game to be run")
+    parser.add_argument(
+        "-hu", "--human", action="store_true", help="Let user play the game."
+    )
+    parser.add_argument(
+        "-sf",
+        "--switch_frame",
+        type=int,
+        default=0,
+        help="Swicht_modfis are applied to the game after this frame-threshold",
+    )
+    parser.add_argument(
+        "-p",
+        "--picture",
+        type=int,
+        default=0,
+        help="Takes a picture after the number of steps provided.",
+    )
+    parser.add_argument(
+        "-a",
+        "--agent",
+        type=str,
+        default="",
+        help="Path to the cleanrl trained agent to be loaded.",
+    )
+    parser.add_argument(
+        "-nr",
+        "--no_render",
+        type=int,
+        default=[],
+        help="Cells to not render.",
+        nargs="+",
+    )
+    parser.add_argument(
+        "-nra", "--no_render_all", action="store_true", help="Not rendering any cell."
+    )
+    parser.add_argument(
+        "-m",
+        "--mode",
+        type=str,
+        default="ram",
+        choices=["ram", "vision"],
+        help="Extraction mode.",
+    )
+    parser.add_argument(
+        "-ls",
+        "--load_state",
+        type=str,
+        default=None,
+        help="Path to the state to be loaded.",
+    )
 
     args = parser.parse_args()
 
@@ -443,6 +493,7 @@ if __name__ == "__main__":
             for i in sorted(renderer.no_render):
                 print(i, end=" ")
             print("")
+
     atexit.register(exit_handler)
 
     renderer.run()

@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import os
 import pickle as pkl
-from ocatari.core import OCAtari, AVAILABLE_GAMES
+from ocatarashii.core import OCAtari, AVAILABLE_GAMES
 
 # Get GAMES from the environment variable or use default if not set
 
@@ -22,7 +22,9 @@ FRAMESKIPS = [1, 4]
 def get_states(game_name):
     path = f"{PICKLE_PATH}/{game_name}"
     if os.path.exists(path):
-        return [f for f in os.listdir(path) if f.startswith("state_") and f.endswith(".pkl")]
+        return [
+            f for f in os.listdir(path) if f.startswith("state_") and f.endswith(".pkl")
+        ]
     else:
         return [""]
 
@@ -43,10 +45,27 @@ def load_pickle_state(env, game_name, state_nr):
         raise FileNotFoundError(f"Pickle file {pickle_file_path} not found.")
 
 
-@pytest.mark.parametrize("env_name, mode, obs_mode, frameskip, state_nr", [(game, mode, obs_mode, frameskip, state_nr) for game in GAMES for mode in MODES for obs_mode in OBS_MODES for frameskip in FRAMESKIPS for state_nr in get_states(game.split("/")[1].split("-")[0])])
+@pytest.mark.parametrize(
+    "env_name, mode, obs_mode, frameskip, state_nr",
+    [
+        (game, mode, obs_mode, frameskip, state_nr)
+        for game in GAMES
+        for mode in MODES
+        for obs_mode in OBS_MODES
+        for frameskip in FRAMESKIPS
+        for state_nr in get_states(game.split("/")[1].split("-")[0])
+    ],
+)
 def test_seeding(env_name, mode, obs_mode, frameskip, state_nr):
-    env = OCAtari(env_name, hud=False, mode=mode, render_mode="rgb_array",
-                  render_oc_overlay=False, obs_mode=obs_mode, frameskip=frameskip)
+    env = OCAtari(
+        env_name,
+        hud=False,
+        mode=mode,
+        render_mode="rgb_array",
+        render_oc_overlay=False,
+        obs_mode=obs_mode,
+        frameskip=frameskip,
+    )
     load_pickle_state(env, env.game_name, state_nr)
 
     env.action_space.seed(42)
@@ -60,8 +79,15 @@ def test_seeding(env_name, mode, obs_mode, frameskip, state_nr):
 
     obs1 = obs
     env.close()
-    env = OCAtari(env_name, hud=False, mode=mode, render_mode="rgb_array",
-                  render_oc_overlay=False, obs_mode=obs_mode, frameskip=frameskip)
+    env = OCAtari(
+        env_name,
+        hud=False,
+        mode=mode,
+        render_mode="rgb_array",
+        render_oc_overlay=False,
+        obs_mode=obs_mode,
+        frameskip=frameskip,
+    )
     load_pickle_state(env, env.game_name, state_nr)
 
     env.action_space.seed(42)
@@ -84,10 +110,26 @@ def test_seeding(env_name, mode, obs_mode, frameskip, state_nr):
     env.close()
 
 
-@pytest.mark.parametrize("env_name, obs_mode, frameskip, state_nr", [(game, obs_mode, frameskip, state_nr) for game in GAMES for obs_mode in OBS_MODES for frameskip in FRAMESKIPS for state_nr in get_states(game.split("/")[1].split("-")[0])])
+@pytest.mark.parametrize(
+    "env_name, obs_mode, frameskip, state_nr",
+    [
+        (game, obs_mode, frameskip, state_nr)
+        for game in GAMES
+        for obs_mode in OBS_MODES
+        for frameskip in FRAMESKIPS
+        for state_nr in get_states(game.split("/")[1].split("-")[0])
+    ],
+)
 def test_outputsimilarity_between_modes(env_name, obs_mode, frameskip, state_nr):
-    env = OCAtari(env_name, hud=False, mode="ram", render_mode="rgb_array",
-                  render_oc_overlay=False, obs_mode=obs_mode, frameskip=frameskip)
+    env = OCAtari(
+        env_name,
+        hud=False,
+        mode="ram",
+        render_mode="rgb_array",
+        render_oc_overlay=False,
+        obs_mode=obs_mode,
+        frameskip=frameskip,
+    )
     load_pickle_state(env, env.game_name, state_nr)
 
     env.action_space.seed(42)
@@ -101,8 +143,15 @@ def test_outputsimilarity_between_modes(env_name, obs_mode, frameskip, state_nr)
 
     obs1 = obs
     env.close()
-    env = OCAtari(env_name, hud=False, mode="vision", render_mode="rgb_array",
-                  render_oc_overlay=False, obs_mode=obs_mode, frameskip=frameskip)
+    env = OCAtari(
+        env_name,
+        hud=False,
+        mode="vision",
+        render_mode="rgb_array",
+        render_oc_overlay=False,
+        obs_mode=obs_mode,
+        frameskip=frameskip,
+    )
     load_pickle_state(env, env.game_name, state_nr)
 
     env.action_space.seed(42)

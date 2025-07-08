@@ -1,15 +1,17 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 from os import path
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 import random
 import matplotlib.pyplot as plt
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-# from ocatari.vision.skiing import objects_colors
-from ocatari.utils import load_agent, parser
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+
+# from ocatarashii.vision.skiing import objects_colors
+from ocatarashii.utils import load_agent, parser
 from copy import deepcopy
 import numpy as np
 import pickle
@@ -18,18 +20,24 @@ import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
 import os
 
+
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=10, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=10,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
+
 
 game_name = "Skiing"
 MODE = "vision"
 MODE = "revised"
-env = OCAtari(game_name, mode=MODE, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, render_mode="rgb_array")
 # env = OCAtari(game_name, mode=MODE, render_mode='human')
 observation, info = env.reset()
 prevRam = None
@@ -58,10 +66,11 @@ def show_detected_objects(obs, info):
             sur_col = make_darker(ocol)
             mark_bb(obs, opos, color=sur_col)
             # mark_point(obs, *opos[:2], color=(255, 255, 0))
-    print("-"*30, end="")
+    print("-" * 30, end="")
     plt.imshow(obs)
     plt.tight_layout()
     plt.show()
+
 
 sizes = []
 ram_states = []
@@ -74,7 +83,7 @@ for i in range(100):
     obs, reward, terminated, truncated, info = env.step(action)
     # if i > 60 and i % 1 == 0:
     if i % 5 == 0:
-        print("-"*30, end="")
+        print("-" * 30, end="")
         ram = env._env.unwrapped.ale.getRAM()
         print(ram[15])
         plt.imshow(obs)
@@ -91,17 +100,20 @@ for i in range(100):
     # modify and display render
 env.close()
 os.makedirs("dumps", exist_ok=True)
-pickle.dump(ram_states, open('dumps/ram_saves_sc.pkl', 'wb'))
-pickle.dump(sizes, open('dumps/sizes.pkl', 'wb'))
+pickle.dump(ram_states, open("dumps/ram_saves_sc.pkl", "wb"))
+pickle.dump(sizes, open("dumps/sizes.pkl", "wb"))
 
 
-
-ram_states = pickle.load(open('dumps/ram_saves_sc.pkl', 'rb'))
-sizes = pickle.load(open('dumps/sizes.pkl', 'rb'))
+ram_states = pickle.load(open("dumps/ram_saves_sc.pkl", "rb"))
+sizes = pickle.load(open("dumps/sizes.pkl", "rb"))
 
 objects_infos = {}
 ram_saves = np.array(ram_states).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 objects_infos["ymax"] = sizes
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
@@ -124,7 +136,9 @@ if DROP_LOW:
     corr = corr[corr.columns[[corr.abs().max() > MIN_CORRELATION]]]
 
 # if METHOD == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -134,12 +148,14 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 
 corrT = corr.T
-import ipdb; ipdb.set_trace()
+import ipdb
+
+ipdb.set_trace()
 for el in ["32", "90"]:
     # maxval = corrT[el].abs().max()
     idx = corr[el].abs().idxmax()

@@ -1,37 +1,44 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import ipdb
 import sys
 import random
 import matplotlib.pyplot as plt
 from os import path
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.vision.spaceinvaders import objects_colors
-from ocatari.vision.pong import objects_colors
-from ocatari.utils import load_agent, parser, make_deterministic
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.vision.spaceinvaders import objects_colors
+from ocatarashii.vision.pong import objects_colors
+from ocatarashii.utils import load_agent, parser, make_deterministic
 import time
 import numpy as np
 from tqdm import tqdm
 
 
-parser.add_argument("-g", "--game", type=str, required=True,
-                    help="game to evaluate (e.g. 'Pong')")
-parser.add_argument("-i", "--interval", type=int, default=10,
-                    help="The frame interval (default 10)")
-parser.add_argument("-s", "--start", type=int, default=0,
-                    help="The frame to start from")
-parser.add_argument("-m", "--mode", choices=["vision", "ram"],
-                    default="ram", help="The extraction mode")
-parser.add_argument("-hud", "--hud", action="store_true",
-                    help="If provided, detect objects from HUD")
+parser.add_argument(
+    "-g", "--game", type=str, required=True, help="game to evaluate (e.g. 'Pong')"
+)
+parser.add_argument(
+    "-i", "--interval", type=int, default=10, help="The frame interval (default 10)"
+)
+parser.add_argument(
+    "-s", "--start", type=int, default=0, help="The frame to start from"
+)
+parser.add_argument(
+    "-m", "--mode", choices=["vision", "ram"], default="ram", help="The extraction mode"
+)
+parser.add_argument(
+    "-hud", "--hud", action="store_true", help="If provided, detect objects from HUD"
+)
 
 opts = parser.parse_args()
 
 
-env = OCAtari(opts.game, mode=opts.mode, render_mode='rgb_array',
-              hud=opts.hud, obs_mode='dqn')
+env = OCAtari(
+    opts.game, mode=opts.mode, render_mode="rgb_array", hud=opts.hud, obs_mode="dqn"
+)
 # env = OCAtari(opts.game+"Deterministic", mode=opts.mode, render_mode='rgb_array', hud=opts.hud, obs_mode='dqn')
 observation, info = env.reset()
 
@@ -50,12 +57,13 @@ for i in tqdm(range(10000)):
     if opts.path is not None:
         action = agent.draw_action(env.dqn_obs)
     else:
-        action = random.randint(0, env.nb_actions-1)
+        action = random.randint(0, env.nb_actions - 1)
     obs, reward, terminated, truncated, info = env.step(action)
     obs = env.getScreenRGB()
     if i >= opts.start and i % opts.interval == 0:
-        for obs, objects_list, title in zip([obs], [env.objects],
-                                            ["ram"] if opts.mode == "ram" else ["vision"]):
+        for obs, objects_list, title in zip(
+            [obs], [env.objects], ["ram"] if opts.mode == "ram" else ["vision"]
+        ):
             print(objects_list)
             for obj in objects_list:
                 opos = obj.xywh

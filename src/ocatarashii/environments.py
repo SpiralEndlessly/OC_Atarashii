@@ -17,7 +17,7 @@ class PositionHistoryEnv(gym.Env):
 
     def __init__(self, env_name: str) -> None:
         super().__init__()
-        self.ocatari_env = OCAtari(env_name, mode="ram", hud=False, obs_mode=None)
+        self.ocatarashii_env = OCAtari(env_name, mode="ram", hud=False, obs_mode=None)
         self.reference_list = self._init_ref_vector()
         self.current_vector = np.zeros(4 * len(self.reference_list), dtype=np.float32)
 
@@ -30,28 +30,30 @@ class PositionHistoryEnv(gym.Env):
 
     @property
     def action_space(self):
-        return self.ocatari_env.action_space
+        return self.ocatarashii_env.action_space
 
     def step(self, *args, **kwargs):
-        _, reward, truncated, terminated, info = self.ocatari_env.step(*args, **kwargs)
+        _, reward, truncated, terminated, info = self.ocatarashii_env.step(
+            *args, **kwargs
+        )
         self._obj2vec()
         return self.current_vector, reward, truncated, terminated, info
 
     def reset(self, *args, **kwargs):
-        _, info = self.ocatari_env.reset(*args, **kwargs)
+        _, info = self.ocatarashii_env.reset(*args, **kwargs)
         self._obj2vec()
         return self.current_vector, info
 
     def render(self, *args, **kwargs):
-        return self.ocatari_env.render(*args, **kwargs)
+        return self.ocatarashii_env.render(*args, **kwargs)
 
     def close(self, *args, **kwargs):
-        return self.ocatari_env.close(*args, **kwargs)
+        return self.ocatarashii_env.close(*args, **kwargs)
 
     def _init_ref_vector(self):
         reference_list = []
         obj_counter = {}
-        for o in self.ocatari_env.max_objects:
+        for o in self.ocatarashii_env.max_objects:
             if o.category not in obj_counter.keys():
                 obj_counter[o.category] = 0
             obj_counter[o.category] += 1
@@ -72,7 +74,9 @@ class PositionHistoryEnv(gym.Env):
 
     def _obj2vec(self):
         temp_ref_list = self.reference_list.copy()
-        for o in self.ocatari_env.objects:  # populate out_vector with object instance
+        for (
+            o
+        ) in self.ocatarashii_env.objects:  # populate out_vector with object instance
             # at position of first category occurance
             idx = temp_ref_list.index(o.category)
             start = idx * 4

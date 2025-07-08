@@ -1,13 +1,14 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
 import matplotlib.pyplot as plt
-sys.path.insert(0, '../../') # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.utils import load_agent, parser
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.utils import load_agent, parser
 import pickle
 
 
@@ -15,7 +16,7 @@ game_name = "Kangaroo"
 MODE = "vision"
 MODE = "ram"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 
 opts = parser.parse_args()
@@ -35,13 +36,15 @@ for i in range(1000):
     # else:
     #     action = 6
     action = 0
-    obs, reward, terminated, truncated, info = env.step(action)  # env.step(6) for easy movement
+    obs, reward, terminated, truncated, info = env.step(
+        action
+    )  # env.step(6) for easy movement
 
     if i == 0:
         env._env.unwrapped.ale.setRAM(36, 1)
         snapshot = pickle.load(open("../Kangaroo_save_state2.pickle", "rb"))
         env._env.env.env.ale.restoreState(snapshot)
-    if i%1 == 0 and i > 10:
+    if i % 1 == 0 and i > 10:
         # obse2 = deepcopy(obse)
         # print(env.objects)
         ram = env._env.unwrapped.ale.getRAM()

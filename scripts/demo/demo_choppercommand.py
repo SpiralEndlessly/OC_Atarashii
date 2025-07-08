@@ -1,22 +1,23 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import random
 import sys
 import matplotlib.pyplot as plt
 import ipdb
-sys.path.insert(0, '../../')  # noqa
+
+sys.path.insert(0, "../../")  # noqa
 import pickle
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.utils import load_agent, parser
-from ocatari.ram.demonattack import ProjectileHostile
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.utils import load_agent, parser
+from ocatarashii.ram.demonattack import ProjectileHostile
 
 game_name = "ChopperCommandNoFrameskip-v4"
 MODE = "vision"
 MODE = "revised"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 
 opts = parser.parse_args()
@@ -37,7 +38,9 @@ for i in range(100000):
     # else:
     #     obs, reward, terminated, truncated, info = env.step(3)
     obs, reward, terminated, truncated, info = env.step(3)
-    obs, reward, terminated, truncated, info = env.step(1)  # env.step(6) for easy movement
+    obs, reward, terminated, truncated, info = env.step(
+        1
+    )  # env.step(6) for easy movement
     # env._env.unwrapped.ale.setRAM(8, 91)
     # env._env.unwrapped.ale.setRAM(68, 0)
     # obs, reward, terminated, truncated, info = env.step(random.randint(-2, 2))
@@ -50,7 +53,7 @@ for i in range(100000):
         # print(ram[97])
         # print(ram[74])
         print(ram[70], ram[94], ram[95])
-        
+
         for obj in env.objects:
             x, y = obj.xy
             if x < 160 and y < 210:

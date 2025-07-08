@@ -3,17 +3,18 @@ import random
 import ipdb
 from matplotlib import pyplot as plt
 import sys
-# import pathlib
-sys.path.insert(0, '../../')  # noqa
 
-from ocatari.core import OCAtari
+# import pathlib
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
 
 """
 set the ram and see whats changed
 """
 
 
-env = OCAtari("ChopperCommand", mode="vision", render_mode='human')
+env = OCAtari("ChopperCommand", mode="vision", render_mode="human")
 prevRam = None
 observation, info = env.reset(seed=42)
 observation, reward, terminated, truncated, info = env.step(0)
@@ -27,7 +28,7 @@ for _ in range(100000):
         target_ram_position += 1
         print("Round: ", target_ram_position)
         env.close()
-        env = OCAtari("ChopperCommand", mode="vision", render_mode='human')
+        env = OCAtari("ChopperCommand", mode="vision", render_mode="human")
         observation, info = env.reset(seed=42)
         observation, reward, terminated, truncated, info = env.step(1)
     new_ram_value = 255

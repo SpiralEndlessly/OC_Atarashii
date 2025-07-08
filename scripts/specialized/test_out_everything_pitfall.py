@@ -3,7 +3,7 @@ Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -14,21 +14,25 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
-sys.path.insert(0, '../ocatari') # noqa
-from ocatari.core import OCAtari
+
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
 from alive_progress import alive_bar
-from ocatari.utils import load_agent, make_deterministic
+from ocatarashii.utils import load_agent, make_deterministic
 import pickle
 
 
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=6, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=6,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
-
 
 
 game_name = "Enduro-v4"
@@ -39,13 +43,12 @@ env = OCAtari(game_name, mode=MODE, render_mode=RENDER_MODE)
 random.seed(0)
 
 
-
 ONE_CHANGE = True
 initial_ram_n = 84
 
 make_deterministic(0, env)
 
-get_bin = lambda x: format(int(x), 'b').zfill(8)
+get_bin = lambda x: format(int(x), "b").zfill(8)
 
 
 observation, info = env.reset()
@@ -66,8 +69,12 @@ for i in range(1):
     subset.append(f"AcmeMine_y")
 ram_saves = []
 actions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+
 class Options(object):
     pass
+
+
 opts = Options()
 opts.path = "models/Gopher/dqn.gz"
 dqn_agent = load_agent(opts, env.action_space.n)
@@ -81,17 +88,25 @@ binary_mode = False
 
 # MAX_DIFF = 200
 original_ram, ram_n = 0, 0
+
+
 def show_ims(obs_list, new_ram):
     _, axes = plt.subplots(1, len(obs_list))
     for ax, im in zip(axes, obs_list):
         ax.imshow(im)
     if binary_mode:
-        plt.suptitle(f"{ram_n} set to {get_bin(new_ram)} (instead of {get_bin(original_ram)}, (={original_ram}))", fontsize=20)
+        plt.suptitle(
+            f"{ram_n} set to {get_bin(new_ram)} (instead of {get_bin(original_ram)}, (={original_ram}))",
+            fontsize=20,
+        )
     else:
-        plt.suptitle(f"{ram_n} set to {new_ram} (instead of {original_ram})", fontsize=20)
+        plt.suptitle(
+            f"{ram_n} set to {new_ram} (instead of {original_ram})", fontsize=20
+        )
     plt.show()
 
-ram_n = initial_ram_n-1
+
+ram_n = initial_ram_n - 1
 while ram_n < 128:
     ram_n += 1
     askinput = True
@@ -110,7 +125,9 @@ while ram_n < 128:
                 break
             else:
                 if binary_mode:
-                    print(f"{ram_n} set to {get_bin(i)} (instead of {get_bin(original_ram)})")
+                    print(
+                        f"{ram_n} set to {get_bin(i)} (instead of {get_bin(original_ram)})"
+                    )
                 else:
                     print(f"{ram_n} set to {i} (instead of {original_ram})")
                 for oobj, nobj in zip(base_objects, env.objects):
@@ -127,7 +144,7 @@ while ram_n < 128:
                         env.set_ram(ram_n, int(el))
                         new_obs, _, _, _, _ = env.step(0)
                         im_diff = new_obs - prev_obs
-                        print(int(el)//16)
+                        print(int(el) // 16)
                         if binary_mode:
                             print(f"{get_bin(original_ram)} -> {get_bin(el)}")
                         else:
@@ -140,7 +157,7 @@ while ram_n < 128:
                         prev_objects = deepcopy(env.objects)
                         original_ram = el
                     elif el == "b":
-                        binary_mode = not(binary_mode)
+                        binary_mode = not (binary_mode)
                         print(f"{binary_mode=}")
                     elif el == "a":
                         askinput = False
@@ -153,4 +170,3 @@ while ram_n < 128:
                         break
                 if not askinput:
                     break
-

@@ -18,10 +18,11 @@ def _convert_number(number):
     :return: The number in decimal
     :rtype: int
     """
-    n1 = number>>4 if number>>4 < 10 else 9
-    n2 = number&15 if number&15 < 10 else 9
+    n1 = number >> 4 if number >> 4 < 10 else 9
+    n2 = number & 15 if number & 15 < 10 else 9
 
     return (n1 * 10) + n2
+
 
 def number_to_bitfield(n):
     """
@@ -36,7 +37,7 @@ def number_to_bitfield(n):
     :return: The number in decimal
     :rtype: list of int
     """
-    lst = [1 if digit == '1' else 0 for digit in bin(n)[2:]]
+    lst = [1 if digit == "1" else 0 for digit in bin(n)[2:]]
     buffer = [0] * (8 - len(lst))
     buffer.extend(lst)
     return buffer
@@ -54,7 +55,7 @@ def bitfield_to_number(b, flip=False):
     :return: The bit list corresponding to this number.
     :rtype: list of int
     """
-    exp = len(b)-1
+    exp = len(b) - 1
     if flip:
         exp = 0
     res = 0
@@ -76,15 +77,15 @@ def get_iou(obj1, obj2):
     |iou_image|
 
     :param obj1: The bouding box of the detected object in (x, y, w, h) format
-    :type obj1: ocatari.ram.game_objects.GameObject or ocatari.vision.game_objects.GameObject
+    :type obj1: ocatarashii.ram.game_objects.GameObject or ocatarashii.vision.game_objects.GameObject
     :param obj2: The ground truth bouding box
-    :type obj2: ocatari.ram.game_objects.GameObject or ocatari.vision.game_objects.GameObject
+    :type obj2: ocatarashii.ram.game_objects.GameObject or ocatarashii.vision.game_objects.GameObject
     """
     # determine the (x, y)-coordinates of the intersection rectangle
     xA = max(obj1.x, obj2.x)
     yA = max(obj1.y, obj2.y)
-    xB = min(obj1.x+obj1.w, obj2.x+obj2.w)
-    yB = min(obj1.y+obj1.h, obj2.y+obj2.h)
+    xB = min(obj1.x + obj1.w, obj2.x + obj2.w)
+    yB = min(obj1.y + obj1.h, obj2.y + obj2.h)
     # compute the area of intersection rectangle
     interArea = max(0, xB - xA) * max(0, yB - yA)
     # compute the area of both the prediction and ground-truth

@@ -1,25 +1,28 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
 import matplotlib.pyplot as plt
-sys.path.insert(0, '../../') # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.utils import load_agent, parser
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.utils import load_agent, parser
 from copy import deepcopy
 
 game_name = "Atlantis"
 MODE = "vision"
 MODE = "revised"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 prev_ram = None
 
 
-def tamper_state(env, ram_poses=[50, 51, 54], lambda_func=lambda x: x+20, to_exclude=[]):
+def tamper_state(
+    env, ram_poses=[50, 51, 54], lambda_func=lambda x: x + 20, to_exclude=[]
+):
     # import ipdb;ipdb.set_trace()
     fig, axes = plt.subplots(1, 3, sharey=True)
     current_obs = deepcopy(env._get_obs())
@@ -30,11 +33,15 @@ def tamper_state(env, ram_poses=[50, 51, 54], lambda_func=lambda x: x+20, to_exc
         nram_at_pos = max(0, min(lambda_func(cram_at_pos), 255))
         env.set_ram(ram_pos, nram_at_pos)
     nram = env.get_ram()
-    import ipdb;ipdb.set_trace()
+    import ipdb
+
+    ipdb.set_trace()
     # new_state, _, _, _, _ = env.step(0)
     new_obs = env.render()
     diff_obs = current_obs - new_obs
-    for ax, obs, val in zip(axes, [current_obs, new_obs, diff_obs], [cram_at_pos, nram_at_pos, ""]):
+    for ax, obs, val in zip(
+        axes, [current_obs, new_obs, diff_obs], [cram_at_pos, nram_at_pos, ""]
+    ):
         ax.imshow(obs)
         ax.set_title(f"RAM[{ram_pos}] -> {val}")
     plt.tight_layout()

@@ -1,4 +1,4 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -8,21 +8,22 @@ import ipdb
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ocatari.vision import utils
+from ocatarashii.vision import utils
 from os import path
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__)))) # noqa
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.vision.spaceinvaders import objects_colors
-from ocatari.vision.pong import objects_colors
-from ocatari.utils import load_agent, parser
+
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.vision.spaceinvaders import objects_colors
+from ocatarashii.vision.pong import objects_colors
+from ocatarashii.utils import load_agent, parser
 
 game_name = "Asterix-v4"  # Pong
 # game_name = "SpaceInvaders"
 # game_name = "Tennis"
 MODE = "vision"
 # MODE = "revised"
-env = OCAtari(game_name, mode=MODE, render_mode='human')
+env = OCAtari(game_name, mode=MODE, render_mode="human")
 observation, info = env.reset()
 
 # notice: agent runs away from meat and mug
@@ -66,7 +67,7 @@ for i in range(10000000):
     ################
     # print ram when changing score to detect bits responsible for kind of objects
     ram = env._env.unwrapped.ale.getRAM()
-    if i>1 and prevRam[95] != ram[95]:
+    if i > 1 and prevRam[95] != ram[95]:
         for k in range(len(ram)):
             if ram[k] != prevRam[k]:
                 if ram[k] > prevRam[k]:
@@ -75,17 +76,30 @@ for i in range(10000000):
                     integ = prevRam[k] - ram[k]
 
                 if integ > 127:
-                    print(str(k), '\t', -integ, '\t',
-                          format(-integ, '08b'), '\t',
-                          str(ram[k]), '\t',
-                          format(ram[k], '08b'),
-                          "negativ")
+                    print(
+                        str(k),
+                        "\t",
+                        -integ,
+                        "\t",
+                        format(-integ, "08b"),
+                        "\t",
+                        str(ram[k]),
+                        "\t",
+                        format(ram[k], "08b"),
+                        "negativ",
+                    )
                 else:
-                    print(str(k), '\t', integ, '\t',
-                          format(integ, '08b'), '\t',
-                          str(ram[k]), '\t',
-                          format(ram[k], '08b')
-                          )
+                    print(
+                        str(k),
+                        "\t",
+                        integ,
+                        "\t",
+                        format(integ, "08b"),
+                        "\t",
+                        str(ram[k]),
+                        "\t",
+                        format(ram[k], "08b"),
+                    )
         print(ram)
         # env.render()
         # rgb_array = env.render()
@@ -98,7 +112,7 @@ for i in range(10000000):
 
     if i > 0:
         prevRam = ram
-    ################
+        ################
         for ax in axes.flatten():
             ax.set_xticks([])
             ax.set_yticks([])

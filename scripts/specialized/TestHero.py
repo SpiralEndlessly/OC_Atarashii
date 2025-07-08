@@ -5,21 +5,23 @@ from copy import deepcopy
 import gymnasium as gym
 import ipdb
 
-from ocatari.utils import *
-from ocatari.core import OCAtari
+from ocatarashii.utils import *
+from ocatarashii.core import OCAtari
 from matplotlib import pyplot as plt
 from pynput import keyboard
 
-from ocatari.vision.utils import make_darker, mark_bb
+from ocatarashii.vision.utils import make_darker, mark_bb
 import pickle
 
 # running this file will start the game in multiple different ways given by the following variables:
 
-default_help = 'F  : FIRE\nTAB:PAUSE'
+default_help = "F  : FIRE\nTAB:PAUSE"
 HELP_TEXT = plt.text(0, -10.2, default_help, fontsize=20)
 
 useOCAtari = True  # if True, running this file will execute the OCAtari code
-printEnvInfo = False  # if True, the extracted objects or the environment info will be printed
+printEnvInfo = (
+    False  # if True, the extracted objects or the environment info will be printed
+)
 
 # gym[atari]/gymnasium
 game_name = "Hero-v4"  # game name ChopperCommand-v4
@@ -30,19 +32,42 @@ seed = 0
 
 # actions
 # possible action inputs given by a run with showInputs = True
-INPUTS = ['NOOP', 'FIRE', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UPRIGHT', 'UPLEFT', 'DOWNRIGHT', 'DOWNLEFT', 'UPFIRE',
-          'RIGHTFIRE', 'LEFTFIRE', 'DOWNFIRE', 'UPRIGHTFIRE', 'UPLEFTFIRE', 'DOWNRIGHTFIRE', 'DOWNLEFTFIRE']
+INPUTS = [
+    "NOOP",
+    "FIRE",
+    "UP",
+    "RIGHT",
+    "LEFT",
+    "DOWN",
+    "UPRIGHT",
+    "UPLEFT",
+    "DOWNRIGHT",
+    "DOWNLEFT",
+    "UPFIRE",
+    "RIGHTFIRE",
+    "LEFTFIRE",
+    "DOWNFIRE",
+    "UPRIGHTFIRE",
+    "UPLEFTFIRE",
+    "DOWNRIGHTFIRE",
+    "DOWNLEFTFIRE",
+]
 performActions = 30000  # number of actions that will be performed until the environment shuts down automatically
 playGame = True  # if True, enables inputs if you want to play
 key_map = {  # the inputs mapped to the possible basic actions
-    'f': 'FIRE',  # -> every other action should be a combination of them
-    'up': 'UP',
-    'right': 'RIGHT',
-    'left': 'LEFT',
-    'down': 'DOWN'}
-isActive = set()  # the set of active basic actions (related to the currently pressed keys)
-default_action = 'NOOP'  # the default action if nothing is pressed or a false combination is pressed
-actionSequence = ['NOOP']  # only used if playGame is False
+    "f": "FIRE",  # -> every other action should be a combination of them
+    "up": "UP",
+    "right": "RIGHT",
+    "left": "LEFT",
+    "down": "DOWN",
+}
+isActive = (
+    set()
+)  # the set of active basic actions (related to the currently pressed keys)
+default_action = (
+    "NOOP"  # the default action if nothing is pressed or a false combination is pressed
+)
+actionSequence = ["NOOP"]  # only used if playGame is False
 # -> repeats the action sequence until the number of actions reaches performActions
 # -> if no sequence is defined, it repeats random actions instead
 
@@ -62,7 +87,9 @@ showImage = True  # if True, plots the rgb array
 # RAM manipulation
 manipulateRAM = False  # if True, you can set the RAM by an index
 setRAMIndex = 52  # the index of the ram that will be set
-setRAMValue = 255  # the value of the ram that will be set (if negative, then it counts up)
+setRAMValue = (
+    255  # the value of the ram that will be set (if negative, then it counts up)
+)
 showDelta = False  # shows any other changes that occured by changing the ram (dependent on env.step)
 slowDownPlot = 0.0001  # pause per iteration
 lastRAM = np.zeros(128)
@@ -90,12 +117,12 @@ def withgym():
     global env
     env = gym.make(game_name, render_mode=render_mode)
     env.reset(seed=seed)
-    env.metadata['render_fps'] = fps
+    env.metadata["render_fps"] = fps
 
     run(env)
 
 
-def withocatari():
+def withocatarashii():
     """
     Sets up the gym environment wrapped into the OCAtari2.0 and runs the game
     """
@@ -195,8 +222,8 @@ def run(env):
         #     reward -= 10
         # previous_lives = info["lives"]
         # print(reward)
-        #player = env.objects[0]
-        #print(distance_to_joey(player))
+        # player = env.objects[0]
+        # print(distance_to_joey(player))
         # returns if the environment is in the terminal state (end) -> terminated, truncated
         if terminated or truncated:
             observation, info = env.reset()
@@ -275,7 +302,9 @@ def run(env):
                 manager.remove()  # remove the last plot to avoid stacking plots
             # import ipdb; ipdb.set_trace()
             manager = plt.imshow(image)  # wrap the array as an image
-            plt.pause(0.001)  # pause the interaction for a bit, so that the plot is drawn
+            plt.pause(
+                0.001
+            )  # pause the interaction for a bit, so that the plot is drawn
             plt.pause(slowDownPlot)
 
         # test usage of ipdb
@@ -290,12 +319,12 @@ def run(env):
             # print("is paused")
 
             if end:
-                plt.close('all')
+                plt.close("all")
                 break
         HELP_TEXT.set_text(default_help)
         # if escaped, end the program
         if end:
-            plt.close('all')
+            plt.close("all")
             break
 
         # if manipulateRAM:
@@ -321,7 +350,7 @@ def printEnvironmentInfo(env, observation, reward, info):
     if not printEnvInfo:
         return
     if useOCAtari:
-        # Besonderheit von ocatari ist neben der Extraktion, die in step() zwischengeschaltet ist, auch die Ausgabe
+        # Besonderheit von ocatarashii ist neben der Extraktion, die in step() zwischengeschaltet ist, auch die Ausgabe
         # dieser Extrahierten Daten:
         # raw daten stehen in info (bekommt man durch oc.step(action))
 
@@ -376,19 +405,19 @@ def on_press(key):
 
         global env
         if pause and key == keyboard.Key.space:
-            ram_pos = int(input('please enter ram pos'))
+            ram_pos = int(input("please enter ram pos"))
             print(f"Currently as : {env.get_ram()[ram_pos]}")
-            new_val = int(input('please enter new target value'))
+            new_val = int(input("please enter new target value"))
             env.set_ram(ram_pos, new_val)
 
         # changing inputs
         key_name = str(key)
         key_name = key_name.removeprefix("Key.")
-        key_name = key_name.removeprefix("\'")
-        key_name = key_name.removesuffix("\'")
+        key_name = key_name.removeprefix("'")
+        key_name = key_name.removesuffix("'")
         if pause and key_name.lower() == "s":
             snapshot = env._env.env.env.ale.cloneState()
-            filename = input('give_filename')
+            filename = input("give_filename")
             pickle.dump(snapshot, open(filename, "wb"))
             print(f"Saved state under {filename}")
 
@@ -403,8 +432,8 @@ def on_release(key):
     # changing inputs
     key_name = str(key)
     key_name = key_name.removeprefix("Key.")
-    key_name = key_name.removeprefix("\'")
-    key_name = key_name.removesuffix("\'")
+    key_name = key_name.removeprefix("'")
+    key_name = key_name.removesuffix("'")
 
     if key_name in key_map.keys():
         # print("released")
@@ -470,6 +499,6 @@ def get_action_name(my_set=None):
 
 
 if useOCAtari:
-    withocatari()
+    withocatarashii()
 else:
     withgym()

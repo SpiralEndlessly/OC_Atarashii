@@ -1,21 +1,22 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import pickle
 import random
 import matplotlib.pyplot as plt
 import os.path as op
-sys.path.insert(0, '../../') # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.utils import load_agent, parser
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.utils import load_agent, parser
 
 game_name = "Assault-v4"
 MODE = "vision"
 MODE = "revised"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 
 opts = parser.parse_args()
@@ -45,7 +46,7 @@ for i in range(10000):
         print(ram[40])
         for obj in env.objects:
             x, y = obj.xy
-            if x < 160 and y < 210: # and obj.visible
+            if x < 160 and y < 210:  # and obj.visible
                 opos = obj.xywh
                 ocol = obj.rgb
                 sur_col = make_darker(ocol)

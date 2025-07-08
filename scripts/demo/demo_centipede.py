@@ -1,18 +1,19 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import matplotlib.pyplot as plt
-from ocatari.ram._helper_methods import bitfield_to_number
-sys.path.insert(0, '../../') # noqa
+from ocatarashii.ram._helper_methods import bitfield_to_number
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
 
 
 game_name = "Centipede"
 MODE = "revised"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="rgb_array")
 observation, info = env.reset()
 
 

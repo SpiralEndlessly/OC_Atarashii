@@ -2,8 +2,9 @@ import time
 import random
 import ipdb
 import sys
-sys.path.insert(0, '../..')  # noqa
-from ocatari.core import OCAtari
+
+sys.path.insert(0, "../..")  # noqa
+from ocatarashii.core import OCAtari
 
 """
 Test ram mode with a human render_mode and ipdb debugger.
@@ -15,7 +16,8 @@ prevRam = None
 already_figured_out = []
 for _ in range(10000000):
     obs, reward, terminated, truncated, info = env.step(
-        random.randint(0, 0))   # change action
+        random.randint(0, 0)
+    )  # change action
 
     ram = env._env.unwrapped.ale.getRAM()
     env.set_ram(30, 100)
@@ -26,8 +28,15 @@ for _ in range(10000000):
                 pad = "           "
                 for u in range(4 - len(str(i))):
                     pad += " "
-                print(str(i) + pad + "value:" +
-                      str(ram[i]) + pad + " was previously " + str(prevRam[i]))
+                print(
+                    str(i)
+                    + pad
+                    + "value:"
+                    + str(ram[i])
+                    + pad
+                    + " was previously "
+                    + str(prevRam[i])
+                )
     print("------------------------------------------")
     prevRam = ram
     print(ram[4])

@@ -2,7 +2,8 @@
 # coding: utf-8
 
 import random
-# appends parent path to syspath to make ocatari importable
+
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 from copy import deepcopy
@@ -11,30 +12,36 @@ from os import path, makedirs
 import matplotlib.pyplot as plt
 import pandas as pd
 from numpy import random
+
 # sys.path.append(path.dirname(path.dirname(path.abspath(__file__)))) # noqa
-from ocatari.core import OCAtari
-from ocatari.utils import load_agent, parser, make_deterministic
-# from ocatari.vision.space_invaders import objects_colors
-from ocatari.vision.pong import objects_colors
-from ocatari.vision.utils import mark_bb, make_darker
+from ocatarashii.core import OCAtari
+from ocatarashii.utils import load_agent, parser, make_deterministic
+
+# from ocatarashii.vision.space_invaders import objects_colors
+from ocatarashii.vision.pong import objects_colors
+from ocatarashii.vision.utils import mark_bb, make_darker
 import pickle
 from tqdm import tqdm
 
 
-parser.add_argument("-g", "--game", type=str, default="Pong",
-                    help="game to evaluate (e.g. 'Pong')")
-parser.add_argument("-i", "--interval", type=int, default=1000,
-                    help="The frame interval (default 10)")
+parser.add_argument(
+    "-g", "--game", type=str, default="Pong", help="game to evaluate (e.g. 'Pong')"
+)
+parser.add_argument(
+    "-i", "--interval", type=int, default=1000, help="The frame interval (default 10)"
+)
 # parser.add_argument("-m", "--mode", choices=["vision", "ram"],
 #                     default="ram", help="The frame interval")
-parser.add_argument("-hud", "--hud", action="store_true",
-                    default=True, help="Detect HUD")
-parser.add_argument("-dqn", "--dqn", action="store_true",
-                    default=True, help="Use DQN agent")
+parser.add_argument(
+    "-hud", "--hud", action="store_true", default=True, help="Detect HUD"
+)
+parser.add_argument(
+    "-dqn", "--dqn", action="store_true", default=True, help="Use DQN agent"
+)
 opts = parser.parse_args()
 
 # Init the environment
-env = OCAtari(opts.game, mode="both", render_mode='human', hud=True)
+env = OCAtari(opts.game, mode="both", render_mode="human", hud=True)
 observation, info = env.reset()
 
 # Set up an agent
@@ -49,8 +56,7 @@ make_deterministic(42, env)
 # Init an empty dataset
 game_nr = 0
 turn_nr = 0
-dataset = {"INDEX": [],  # "OBS": [],
-           "RAM": [], "VIS": [], "HUD": []}
+dataset = {"INDEX": [], "RAM": [], "VIS": [], "HUD": []}  # "OBS": [],
 frames = []
 r_objs = []
 v_objs = []
@@ -70,12 +76,13 @@ for i in tqdm(range(10000)):
     r_objs.append(deepcopy(env.objects))
     v_objs.append(deepcopy(env.objects_v))
     # dataset["OBS"].append(obs.flatten().tolist())
-    dataset["VIS"].append(
-        [x for x in sorted(env.objects_v, key=lambda o: str(o))])
+    dataset["VIS"].append([x for x in sorted(env.objects_v, key=lambda o: str(o))])
     dataset["RAM"].append(
-        [x for x in sorted(env.objects, key=lambda o: str(o)) if x.hud == False])
+        [x for x in sorted(env.objects, key=lambda o: str(o)) if x.hud == False]
+    )
     dataset["HUD"].append(
-        [x for x in sorted(env.objects, key=lambda o: str(o)) if x.hud == True])
+        [x for x in sorted(env.objects, key=lambda o: str(o)) if x.hud == True]
+    )
     turn_nr = turn_nr + 1
 
     # if a game is terminated, restart with a new game and update turn and game counter
@@ -130,7 +137,7 @@ for i in tqdm(range(10000)):
         """
 env.close()
 
-df = pd.DataFrame(dataset, columns=['INDEX', 'RAM', 'HUD', 'VIS'])
+df = pd.DataFrame(dataset, columns=["INDEX", "RAM", "HUD", "VIS"])
 makedirs("data/datasets/", exist_ok=True)
 prefix = f"{opts.game}_dqn" if opts.dqn else f"{opts.game}_random"
 df.to_csv(f"data/datasets/{prefix}.csv", index=False)

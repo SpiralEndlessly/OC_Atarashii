@@ -3,7 +3,7 @@ Demo script that allows me to find the correlation between ram states and
 detected objects through vision in Tennis
 """
 
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
@@ -14,18 +14,21 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import RANSACRegressor, LinearRegression
-sys.path.insert(0, '../ocatari') # noqa
-from ocatari.core import OCAtari
+
+sys.path.insert(0, "../ocatarashii")  # noqa
+from ocatarashii.core import OCAtari
 from alive_progress import alive_bar
 
 
-
-
 def ransac_regression(x, y):
-    ransac = RANSACRegressor(estimator=LinearRegression(),
-                             min_samples=50, max_trials=100,
-                             loss='absolute_error', random_state=42,
-                             residual_threshold=10)
+    ransac = RANSACRegressor(
+        estimator=LinearRegression(),
+        min_samples=50,
+        max_trials=100,
+        loss="absolute_error",
+        random_state=42,
+        residual_threshold=10,
+    )
     ransac.fit(np.array(x).reshape(-1, 1), y)
     return ransac.estimator_.coef_.item(), ransac.estimator_.intercept_.item()
 
@@ -58,20 +61,23 @@ ram_saves = []
 actions = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 for i in tqdm(range(NB_SAMPLES)):
     # obs, reward, terminated, truncated, info = env.step(random.randint(0, env.action_space.n-1))
-    action = actions[i%len(actions)]
+    action = actions[i % len(actions)]
     # if i % 5: # reset for pressing
     #     action = 0
     obs, reward, terminated, truncated, info = env.step(action)
-    if info.get('frame_number') > 10 and i % 1 == 0:
+    if info.get("frame_number") > 10 and i % 1 == 0:
         SKIP = False
         # print(env.objects)
         for obj_name in object_list:  # avoid state without the tracked objects
-            if str(env.objects).count(obj_name) != 1 or not str(env.objects).count("Projectile at (75,") == 1:
+            if (
+                str(env.objects).count(obj_name) != 1
+                or not str(env.objects).count("Projectile at (75,") == 1
+            ):
                 SKIP = True
                 break
         if str(env.objects).count("Projectile at (75,") == 0:
             print(env._env.unwrapped.ale.getRAM()[106])
-        if SKIP:# or env.objects[-2].y < env.objects[-1].y:
+        if SKIP:  # or env.objects[-2].y < env.objects[-1].y:
             continue
         for obj in env.objects:
             if obj_name in str(obj):
@@ -90,10 +96,16 @@ for i in tqdm(range(NB_SAMPLES)):
 env.close()
 
 
-import ipdb; ipdb.set_trace()
+import ipdb
+
+ipdb.set_trace()
 
 ram_saves = np.array(ram_saves).T
-from_rams = {str(i): ram_saves[i] for i in range(128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+from_rams = {
+    str(i): ram_saves[i]
+    for i in range(128)
+    if not np.all(ram_saves[i] == ram_saves[i][0])
+}
 objects_infos.update(from_rams)
 df = pd.DataFrame(objects_infos)
 
@@ -122,7 +134,9 @@ if DROP_LOW:
     corr = corr.loc[:, (corr.abs() > 0.3).any()]
 
 # if METHOD == "pearson":
-ax = sns.heatmap(corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
+ax = sns.heatmap(
+    corr, vmin=-1, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200)
+)
 # else:
 #     ax = sns.heatmap(corr, vmin=0, vmax=1, annot=True, cmap=sns.diverging_palette(20, 220, n=200))
 # ax.set_yticklabels(ax.get_yticklabels(), rotation=90, horizontalalignment='right')
@@ -132,7 +146,7 @@ for tick in ax.get_yticklabels():
     tick.set_rotation(0)
 
 xlabs = corr.columns.to_list()
-plt.xticks(list(np.arange(0.5, len(xlabs) + .5, 1)), xlabs)
+plt.xticks(list(np.arange(0.5, len(xlabs) + 0.5, 1)), xlabs)
 plt.title(game_name)
 plt.show()
 
@@ -153,4 +167,3 @@ for el in corrT:
         plt.xlabel(idx)
         plt.ylabel(el)
         plt.show()
-

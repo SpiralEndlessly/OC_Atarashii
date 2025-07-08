@@ -1,13 +1,15 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import sys
 import random
 import matplotlib.pyplot as plt
-sys.path.insert(0, '../../ocatari') # noqa
+
+sys.path.insert(0, "../../ocatarashii")  # noqa
 from core import OCAtari
 from vision.utils import mark_bb, make_darker
 from vision.spaceinvaders import objects_colors
-# from ocatari.vision.pong import objects_colors
+
+# from ocatarashii.vision.pong import objects_colors
 from utils import load_agent, parser
 from tqdm import tqdm
 
@@ -17,7 +19,7 @@ game_name = "SpaceInvaders"
 # game_name = "Tennis"
 MODE = "vision"
 # MODE = "revised"
-env = OCAtari(game_name, mode=MODE, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, render_mode="rgb_array")
 observation, info = env.reset()
 prevRam = None
 already_figured_out = []
@@ -33,7 +35,7 @@ for i in tqdm(range(10000)):
     else:
         action = random.randint(0, 5)
     obs, reward, terminated, truncated, info = env.step(action)
-    if info.get('frame_number') > 0 and i % 100 == 0:
+    if info.get("frame_number") > 0 and i % 100 == 0:
         for obj in env.objects:
             opos = obj.xywh
             ocol = obj.rgb

@@ -1,13 +1,14 @@
 from matplotlib import pyplot as plt
-from ocatari.core import OCAtari
+from ocatarashii.core import OCAtari
 import random
 
 """
 this test makes it easy to test several indices individually or at once and to read the BITS of changing values
 """
 
-env = OCAtari("SpaceInvaders-v4", mode="vision",
-              render_mode='rgb_array')  # Skiing-v4, DemonAttack-v4
+env = OCAtari(
+    "SpaceInvaders-v4", mode="vision", render_mode="rgb_array"
+)  # Skiing-v4, DemonAttack-v4
 observation, info = env.reset()
 prevRam = None
 
@@ -68,11 +69,17 @@ for ROUND in range(10000000):
                         integer = prevRam[k] - ram[k]
                         string = "-" + str(integer)
 
-                    print(str(k), '\t', string, '\t',
-                          format(integer, '08b'), '\t',
-                          str(ram[k]), '\t',
-                          format(ram[k], '08b')
-                          )
+                    print(
+                        str(k),
+                        "\t",
+                        string,
+                        "\t",
+                        format(integer, "08b"),
+                        "\t",
+                        str(ram[k]),
+                        "\t",
+                        format(ram[k], "08b"),
+                    )
 
             env.render()
             rgb_array = env.render()
@@ -86,11 +93,11 @@ for ROUND in range(10000000):
         # print(info)
 
         if ROUND > 1:
-            print('round =', ROUND, 'ram[' + str(i) + '] =', ram[i])
+            print("round =", ROUND, "ram[" + str(i) + "] =", ram[i])
             # for k in [6, 38, 54, 83, 88, 89, 120]:  # checking set of specific values
             #     print('ram[' + str(k) + '] =', ram[k])
         else:
-            print('round =', ROUND, 'i =', i)
+            print("round =", ROUND, "i =", i)
 
         # time.sleep(0.1)
     if ROUND > 0:

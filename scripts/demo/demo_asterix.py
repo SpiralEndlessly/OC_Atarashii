@@ -1,19 +1,20 @@
-# appends parent path to syspath to make ocatari importable
+# appends parent path to syspath to make ocatarashii importable
 # like it would have been installed as a package
 import random
 import sys
 import matplotlib.pyplot as plt
 import ipdb
-sys.path.insert(0, '../../')  # noqa
 
-from ocatari.core import OCAtari
-from ocatari.vision.utils import mark_bb, make_darker
-from ocatari.ram.demonattack import ProjectileHostile
+sys.path.insert(0, "../../")  # noqa
+
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.utils import mark_bb, make_darker
+from ocatarashii.ram.demonattack import ProjectileHostile
 
 game_name = "Asterix-v4"
 MODE = "vision"
 HUD = True
-env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode='human')
+env = OCAtari(game_name, mode=MODE, hud=HUD, render_mode="human")
 observation, info = env.reset()
 
 for i in range(10000000):

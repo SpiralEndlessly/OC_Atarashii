@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from ocatari.core import OCAtari
+from ocatarashii.core import OCAtari
 
 
 def test_invalid_game_name():
@@ -21,14 +21,15 @@ def test_invalid_game_name():
         (["ori", "dqn", "obs"], "obj"),
         (["ori", "dqn"], "obj"),
         (["ori"], "ori"),
-    ]
+    ],
 )
 def test_multiple_stacks(cbs, obs_mode):
     """
     Test cloning and restoring the state of the environment.
     """
-    env = OCAtari(env_name="ALE/Pong-v5", mode="ram",
-                  create_buffer_stacks=cbs, obs_mode=obs_mode)
+    env = OCAtari(
+        env_name="ALE/Pong-v5", mode="ram", create_buffer_stacks=cbs, obs_mode=obs_mode
+    )
     env.reset()
 
     if "dqn" in cbs or obs_mode == "dqn":
@@ -73,7 +74,8 @@ def test_clone_restore_state():
     env._restore_state(initial_state)  # Restore the previous state
     restored_state = env._clone_state()
     assert np.array_equal(
-        initial_state, restored_state), "Restored state should match the initial state."
+        initial_state, restored_state
+    ), "Restored state should match the initial state."
     env.close()
 
 

@@ -5,12 +5,12 @@ from copy import deepcopy
 import gymnasium as gym
 import ipdb
 
-from ocatari.utils import *
-from ocatari.core import OCAtari
+from ocatarashii.utils import *
+from ocatarashii.core import OCAtari
 from matplotlib import pyplot as plt
 from pynput import keyboard
 
-from ocatari.vision.utils import make_darker, mark_bb
+from ocatarashii.vision.utils import make_darker, mark_bb
 import pickle
 import pandas as pd
 from tqdm import tqdm
@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 # running this file will start the game in multiple different ways given by the following variables:
 
-default_help = 'F  : FIRE\nTAB:PAUSE'
+default_help = "F  : FIRE\nTAB:PAUSE"
 HELP_TEXT = plt.text(0, -10.2, default_help, fontsize=20)
 
 
@@ -28,61 +28,80 @@ useOCAtari = True
 printEnvInfo = False
 
 # gym[atari]/gymnasium
-game_name = "ChopperCommand-v4"    # game name ChopperCommand-v4
-game_name = "MsPacman-v4"    # game name ChopperCommand-v4
+game_name = "ChopperCommand-v4"  # game name ChopperCommand-v4
+game_name = "MsPacman-v4"  # game name ChopperCommand-v4
 # game_name = "Centipede-v4"    # game name ChopperCommand-v4
-game_name = "RiverraidNoFrameskip-v4"    # game name ChopperCommand-v4
-game_name = "Berzerk-v4"    # game name ChopperCommand-v4
+game_name = "RiverraidNoFrameskip-v4"  # game name ChopperCommand-v4
+game_name = "Berzerk-v4"  # game name ChopperCommand-v4
 # render_mode => "rgb_array" is advised, when playing
 render_mode = "rgb_array"
 # => "human" to also get the normal representation to compare between object extraction and default
-fps = 60                        # render fps
+fps = 60  # render fps
 seed = 0
 
 # actions
 # possible action inputs given by a run with showInputs = True
-INPUTS = ['NOOP', 'FIRE', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UPRIGHT', 'UPLEFT', 'DOWNRIGHT', 'DOWNLEFT', 'UPFIRE',
-          'RIGHTFIRE', 'LEFTFIRE', 'DOWNFIRE', 'UPRIGHTFIRE', 'UPLEFTFIRE', 'DOWNRIGHTFIRE', 'DOWNLEFTFIRE']
+INPUTS = [
+    "NOOP",
+    "FIRE",
+    "UP",
+    "RIGHT",
+    "LEFT",
+    "DOWN",
+    "UPRIGHT",
+    "UPLEFT",
+    "DOWNRIGHT",
+    "DOWNLEFT",
+    "UPFIRE",
+    "RIGHTFIRE",
+    "LEFTFIRE",
+    "DOWNFIRE",
+    "UPRIGHTFIRE",
+    "UPLEFTFIRE",
+    "DOWNRIGHTFIRE",
+    "DOWNLEFTFIRE",
+]
 # number of actions that will be performed until the environment shuts down automatically
 performActions = 1000
-playGame = True                 # if True, enables inputs if you want to play
-key_map = {                     # the inputs mapped to the possible basic actions
-    'f': 'FIRE',                    # -> every other action should be a combination of them
-    'up': 'UP',
-    'right': 'RIGHT',
-    'left': 'LEFT',
-    'down': 'DOWN'}
+playGame = True  # if True, enables inputs if you want to play
+key_map = {  # the inputs mapped to the possible basic actions
+    "f": "FIRE",  # -> every other action should be a combination of them
+    "up": "UP",
+    "right": "RIGHT",
+    "left": "LEFT",
+    "down": "DOWN",
+}
 # the set of active basic actions (related to the currently pressed keys)
 isActive = set()
 # the default action if nothing is pressed or a false combination is pressed
-default_action = 'NOOP'
-actionSequence = ['NOOP']  # only used if playGame is False
+default_action = "NOOP"
+actionSequence = ["NOOP"]  # only used if playGame is False
 # -> repeats the action sequence until the number of actions reaches performActions
 # -> if no sequence is defined, it repeats random actions instead
 
 
 # OCAtari modes
-mode = "vision"                    # ram, vision, test
+mode = "vision"  # ram, vision, test
 # if True, the returned objects contain only the necessary information to play the game
 HUD = False
 
 # get valuable information for reversed engineering purposes
 # if True, prints the number and the description of the possible inputs (actions)
 showInputs = False
-showActions = False             # if True, prints the action that will be done
-showRAM = False                 # if True, prints the RAM to the console
+showActions = False  # if True, prints the action that will be done
+showRAM = False  # if True, prints the RAM to the console
 # render_mode=="rgb_array" only
-printRGB = False                # if True, prints the rgb array
-showImage = True                # if True, plots the rgb array
+printRGB = False  # if True, prints the rgb array
+showImage = True  # if True, plots the rgb array
 
 # RAM manipulation
-manipulateRAM = False          # if True, you can set the RAM by an index
-setRAMIndex = 52                 # the index of the ram that will be set
+manipulateRAM = False  # if True, you can set the RAM by an index
+setRAMIndex = 52  # the index of the ram that will be set
 # the value of the ram that will be set (if negative, then it counts up)
 setRAMValue = 255
 # shows any other changes that occured by changing the ram (dependent on env.step)
 showDelta = False
-slowDownPlot = 0.0001              # pause per iteration
+slowDownPlot = 0.0001  # pause per iteration
 lastRAM = np.zeros(128)
 
 # DO NOT CHANGE! global variables used in context of interrupting, but keeping the plot stable (must be False)
@@ -108,19 +127,18 @@ def withgym():
     global env
     env = gym.make(game_name, render_mode=render_mode)
     env.reset(seed=seed)
-    env.metadata['render_fps'] = fps
+    env.metadata["render_fps"] = fps
 
     run(env)
 
 
-def withocatari():
+def withocatarashii():
     """
     Sets up the gym environment wrapped into the OCAtari2.0 and runs the game
     """
     # set up environment
     global env
-    oc = OCAtari(env_name=game_name, mode=mode,
-                 hud=HUD, render_mode=render_mode)
+    oc = OCAtari(env_name=game_name, mode=mode, hud=HUD, render_mode=render_mode)
     oc.reset(seed=seed)
     # oc.metadata['render_fps'] = fps, access to this would be nice ???
     env = oc
@@ -133,11 +151,11 @@ def withocatari():
 def distance_to_joey(player):
     max_dist = 344
     if player.y > 130:
-        return 1 - (120 * 3 - player.x)/max_dist
+        return 1 - (120 * 3 - player.x) / max_dist
     elif player.y > 70:
-        return 1 - (120 + player.x)/max_dist
+        return 1 - (120 + player.x) / max_dist
     elif player.y > 25:
-        return 1 - (140 - player.x)/max_dist
+        return 1 - (140 - player.x) / max_dist
     else:
         return 1
 
@@ -285,7 +303,7 @@ def run(env):
                     # change rgb a tiny bit, so that it is distinguishable from the objects color
                     bb_color = make_darker(object_color)
                     r, g, b = bb_color
-                    if r+g+b <= 20:
+                    if r + g + b <= 20:
                         bb_color = 255, 255, 255
                     mark_bb(observation, object_position, color=bb_color)
             image = observation
@@ -319,28 +337,32 @@ def run(env):
             # print("is paused")
 
             if end:
-                plt.close('all')
+                plt.close("all")
                 break
         HELP_TEXT.set_text(default_help)
         # if escaped, end the program
         if end:
-            plt.close('all')
+            plt.close("all")
             break
 
         # if manipulateRAM:
-         #   plt.pause(1)
-          #  env.set_ram(div, old_value)
+        #   plt.pause(1)
+        #  env.set_ram(div, old_value)
 
     # close the environment at the end
     env.close()
     listener.stop()
 
     ram_saves = np.array(ram_saves).T
-    from_rams = {str(i): ram_saves[i] for i in range(
-        128) if not np.all(ram_saves[i] == ram_saves[i][0])}
+    from_rams = {
+        str(i): ram_saves[i]
+        for i in range(128)
+        if not np.all(ram_saves[i] == ram_saves[i][0])
+    }
     objects_infos.update(from_rams)
     df = pd.DataFrame(objects_infos)
     import ipdb
+
     ipdb.set_trace()
 
     # save_fn = "mode_change_kangaroo.pkl"
@@ -359,7 +381,7 @@ def printEnvironmentInfo(env, observation, reward, info):
     if not printEnvInfo:
         return
     if useOCAtari:
-        # Besonderheit von ocatari ist neben der Extraktion, die in step() zwischengeschaltet ist, auch die Ausgabe
+        # Besonderheit von ocatarashii ist neben der Extraktion, die in step() zwischengeschaltet ist, auch die Ausgabe
         # dieser Extrahierten Daten:
         # raw daten stehen in info (bekommt man durch oc.step(action))
 
@@ -414,19 +436,19 @@ def on_press(key):
 
         global env
         if pause and key == keyboard.Key.space:
-            ram_pos = int(input('please enter ram pos'))
+            ram_pos = int(input("please enter ram pos"))
             print(f"Currently as : {env.get_ram()[ram_pos]}")
-            new_val = int(input('please enter new target value'))
+            new_val = int(input("please enter new target value"))
             env.set_ram(ram_pos, new_val)
 
         # changing inputs
         key_name = str(key)
         key_name = key_name.removeprefix("Key.")
-        key_name = key_name.removeprefix("\'")
-        key_name = key_name.removesuffix("\'")
+        key_name = key_name.removeprefix("'")
+        key_name = key_name.removesuffix("'")
         if pause and key_name.lower() == "s":
             snapshot = env._env.env.env.ale.cloneState()
-            filename = input('give_filename')
+            filename = input("give_filename")
             pickle.dump(snapshot, open(filename, "wb"))
             print(f"Saved state under {filename}")
 
@@ -441,8 +463,8 @@ def on_release(key):
     # changing inputs
     key_name = str(key)
     key_name = key_name.removeprefix("Key.")
-    key_name = key_name.removeprefix("\'")
-    key_name = key_name.removesuffix("\'")
+    key_name = key_name.removeprefix("'")
+    key_name = key_name.removesuffix("'")
 
     if key_name in key_map.keys():
         # print("released")
@@ -510,6 +532,6 @@ def get_action_name(my_set=None):
 
 
 if useOCAtari:
-    withocatari()
+    withocatarashii()
 else:
     withgym()

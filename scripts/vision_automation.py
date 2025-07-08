@@ -1,10 +1,12 @@
 from matplotlib import pyplot as plt
 import sys
+
 # import pathlib
-sys.path.insert(0, '../../ocatari')  # noqa
-from ocatari import core
-# from ocatari.vision.utils import plot_bounding_boxes_from_info
-from ocatari.vision.utils import find_objects, plot_bounding_boxes, mark_bb  # noqa
+sys.path.insert(0, "../../ocatarashii")  # noqa
+from ocatarashii import core
+
+# from ocatarashii.vision.utils import plot_bounding_boxes_from_info
+from ocatarashii.vision.utils import find_objects, plot_bounding_boxes, mark_bb  # noqa
 import queue
 import os
 import pathlib
@@ -103,7 +105,7 @@ def on_close(event):
 def get_user_input():
     global name
     try:
-        name = input("Enter " + str(index+1) + ". Object Name:")
+        name = input("Enter " + str(index + 1) + ". Object Name:")
     except:
         pass
     # threading.main_thread()
@@ -119,18 +121,23 @@ def generate_code(game_name):
         code += "    def __init__(self, *args, **kwargs):\n"
         code += "        super().__init__(*args, **kwargs)\n"
         code += "        self.rgb = " + str(col) + "\n\n\n"
-    code += "\ndef _detect_objects_" + \
-        str(game_name).lower() + "(objects, obs, hud=False):\n"
+    code += (
+        "\ndef _detect_objects_"
+        + str(game_name).lower()
+        + "(objects, obs, hud=False):\n"
+    )
     code += "    objects.clear()\n\n"
     for obj, col in colors.items():
-        code += "    " + \
-            str(obj) + \
-            " = find_objects(obs, objects_colors['" + \
-            str(obj) + "'], min_distance=1)\n"
+        code += (
+            "    "
+            + str(obj)
+            + " = find_objects(obs, objects_colors['"
+            + str(obj)
+            + "'], min_distance=1)\n"
+        )
         # code += "    objects['" + str(obj) + "'] = " + str(obj) + "\n\n"
         code += "    for bb in " + str(obj) + ":\n"
-        code += "        objects.append(" + \
-            str(obj).capitalize() + "(*bb))\n\n"
+        code += "        objects.append(" + str(obj).capitalize() + "(*bb))\n\n"
 
     code += "\n\n"
 
@@ -138,18 +145,22 @@ def generate_code(game_name):
 
 
 def write_code_to_file(code, game_name, overwrite=False):
-    path = str(pathlib.Path().resolve()) + \
-        "/../../ocatari/vision/" + str(game_name).lower() + ".py"
+    path = (
+        str(pathlib.Path().resolve())
+        + "/../../ocatarashii/vision/"
+        + str(game_name).lower()
+        + ".py"
+    )
 
     if not os.path.exists(path) or overwrite:
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             print(code, file=f)
             print("code printed")
 
 
 if __name__ == "__main__":
     GAME_NAME = "MontezumaRevenge"
-    env = gym.make(GAME_NAME, render_mode='rgb_array')
+    env = gym.make(GAME_NAME, render_mode="rgb_array")
     rgb_array, info = env.reset()
     rgb_array = env.render()
     for i in range(100):

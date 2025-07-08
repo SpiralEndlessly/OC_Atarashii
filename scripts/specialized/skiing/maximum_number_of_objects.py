@@ -2,17 +2,18 @@ import sys
 import random
 import matplotlib.pyplot as plt
 from os import path
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__)))) # noqa
-from ocatari.core import OCAtari
-from ocatari.vision.spaceinvaders import objects_colors
-from ocatari.vision.pong import objects_colors
-from ocatari.utils import load_agent, parser
+
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))  # noqa
+from ocatarashii.core import OCAtari
+from ocatarashii.vision.spaceinvaders import objects_colors
+from ocatarashii.vision.pong import objects_colors
+from ocatarashii.utils import load_agent, parser
 
 
 game_name = "Skiing"
 
 MODE = "revised"
-env = OCAtari(game_name, mode=MODE, render_mode='rgb_array')
+env = OCAtari(game_name, mode=MODE, render_mode="rgb_array")
 observation, info = env.reset()
 
 opts = parser.parse_args()
@@ -43,4 +44,6 @@ for i in range(10000):
     # modify and display render
 
 env.close()
-import ipdb; ipdb.set_trace()
+import ipdb
+
+ipdb.set_trace()
